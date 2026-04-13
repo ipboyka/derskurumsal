@@ -675,8 +675,8 @@
     </div>
 
     <script>
-        let teachers = JSON.parse(localStorage.getItem('kurumTeachers') || '[]');
-        let students = JSON.parse(localStorage.getItem('kurumStudents') || '[]');
+        var teachers = JSON.parse(localStorage.getItem('kurumTeachers') || '[]');
+        var students = JSON.parse(localStorage.getItem('kurumStudents') || '[]');
         function saveData() { localStorage.setItem('kurumTeachers', JSON.stringify(teachers)); localStorage.setItem('kurumStudents', JSON.stringify(students)); }
 
         function switchTab(tab) {
@@ -1384,7 +1384,7 @@
 
         // --- ZAMAN ÇİZELGESİ (SCHEDULE) SİSTEMİ (YENİ EKLENDİ) ---
         let specialBreaks = []; 
-        let scheduleConfig = JSON.parse(localStorage.getItem('kurumScheduleConfig')) || {
+        var scheduleConfig = JSON.parse(localStorage.getItem('kurumScheduleConfig')) || {
             startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: []
         };
 
@@ -2250,22 +2250,94 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // YENİ: setDoc import edildi (Buluta yazmak için)
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        
         const firebaseConfig = { apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8", authDomain:"tripturkey-79e75.firebaseapp.com", projectId:"tripturkey-79e75", storageBucket:"tripturkey-79e75.firebasestorage.app", messagingSenderId:"69790477258", appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33" };
         const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+
+        // --- SİHİRLİ FIREBASE SENKRONİZASYON MOTORU ---
+        window.currentUserId = null;
+        window.isFirebaseLoaded = false;
+
+        // Buluta Yedekleme Fonksiyonu
+        window.syncToFirebase = async function() {
+            if (!window.currentUserId || !window.isFirebaseLoaded) return;
+            try {
+                // RAM ve LocalStorage'daki en güncel verileri topla
+                const dataToSave = {
+                    teachers: window.teachers || [],
+                    students: window.students || [],
+                    scheduleConfig: window.scheduleConfig || {},
+                    savedSchedule: JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]')
+                };
+                await setDoc(doc(db, "kurum_data", window.currentUserId), dataToSave);
+                console.log("Buluta (Firebase) başarıyla yedeklendi!");
+            } catch (e) { console.error("Firebase senkronizasyon hatası:", e); }
+        };
+
+        // KANCA (HOOK) SİSTEMİ:
+        // Uygulamanın herhangi bir yeri kayıt yaptığında araya girip otomatik olarak Firebase'e fırlatır!
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            originalSetItem.apply(this, arguments);
+            if (['kurumTeachers', 'kurumStudents', 'kurumScheduleConfig', 'kurumSavedSchedule'].includes(key)) {
+                if (window.syncToFirebase) window.syncToFirebase();
+            }
+        };
+
         onAuthStateChanged(auth, async(user)=>{
             const ac=document.getElementById('headerAuthContainer');
             if(user){
+                window.currentUserId = user.uid;
                 let dn=user.displayName||"Profil";
-                try{const ud=await getDoc(doc(db,"users",user.uid));if(ud.exists()){const d=ud.data();if(d.username)dn=d.username;if(d.isAdmin===true&&document.getElementById('sideMenuAdminBtn'))document.getElementById('sideMenuAdminBtn').style.display='';}}catch(e){console.error(e);}
+                try {
+                    // Kullanıcı Adı ve Admin Kontrolü
+                    const ud=await getDoc(doc(db,"users",user.uid));
+                    if(ud.exists()){
+                        const d=ud.data();
+                        if(d.username) dn=d.username;
+                        if(d.isAdmin===true && document.getElementById('sideMenuAdminBtn')) document.getElementById('sideMenuAdminBtn').style.display='';
+                    }
+
+                    // --- KURUM VERİLERİNİ BULUTTAN ÇEK (MERKEZİ SİSTEM) ---
+                    const kurumDoc = await getDoc(doc(db, "kurum_data", user.uid));
+                    if (kurumDoc.exists()) {
+                        const kData = kurumDoc.data();
+                        
+                        // Verileri JavaScript RAM'ine aktar
+                        window.teachers = kData.teachers || [];
+                        window.students = kData.students || [];
+                        window.scheduleConfig = kData.scheduleConfig || { startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: [] };
+                        
+                        // Verileri LocalStorage'a yaz (Hızlı yüklenme ve sistemin okuması için)
+                        // Uyarı: originalSetItem kullanıyoruz ki kancaya takılıp sonsuz döngüye girmesin!
+                        originalSetItem.call(localStorage, 'kurumTeachers', JSON.stringify(window.teachers));
+                        originalSetItem.call(localStorage, 'kurumStudents', JSON.stringify(window.students));
+                        originalSetItem.call(localStorage, 'kurumScheduleConfig', JSON.stringify(window.scheduleConfig));
+                        originalSetItem.call(localStorage, 'kurumSavedSchedule', JSON.stringify(kData.savedSchedule || []));
+                        
+                        // Ekranlardaki Tabloları Buluttan Gelen Veriyle Baştan Çiz
+                        if(typeof renderTeachers === 'function') renderTeachers();
+                        if(typeof renderStudents === 'function') renderStudents();
+                        if(typeof updateCounts === 'function') updateCounts();
+                    }
+                    window.isFirebaseLoaded = true; // Sistemin yüklenmesi tamamlandı, artık yedeklemeye açığız.
+
+                } catch(e) { console.error(e); }
+
                 ac.innerHTML='<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> '+dn+'</span>';
                 if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='none';
                 if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='none';
-            }else{
+            } else {
+                // Çıkış yapıldığında sistemi sıfırla
+                window.currentUserId = null;
+                window.isFirebaseLoaded = false;
                 ac.innerHTML='<button class="btn-outline" onclick="window.location.href=\'index.html?action=login\'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href=\'index.html?action=register\'">Kaydol</button>';
                 if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='';
                 if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='';
             }
+            // Yükleme ekranını kapat
             setTimeout(()=>{document.getElementById('mainPageLoader').classList.add('hidden');},300);
         });
     </script>
