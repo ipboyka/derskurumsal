@@ -675,23 +675,79 @@
     </div>
 
     <script>
-        var teachers = JSON.parse(localStorage.getItem('kurumTeachers') || '[]');
-        var students = JSON.parse(localStorage.getItem('kurumStudents') || '[]');
-        // savedSchedule artık RAM'de de tutuluyor - localStorage'a bağımlılık kalkıyor
-        var savedScheduleData = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+        var teachers = [];
+        var students = [];
+        var savedScheduleData = [];
+        var scheduleConfig = {
+            startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: []
+        };
 
-        function saveData() { 
-            localStorage.setItem('kurumTeachers', JSON.stringify(teachers)); 
-            localStorage.setItem('kurumStudents', JSON.stringify(students)); 
+        // Firebase araçları - module script dolduracak
+        window._fbSave = null; // Firebase'e kaydetme fonksiyonu (module içinden atanacak)
+
+        // === KAYDETME: Her zaman localStorage + Firebase (varsa) ===
+        function saveToCloud() {
+            try {
+                const data = window.getKurumData();
+                localStorage.setItem('kurum_data', JSON.stringify(data));
+                console.log("💾 localStorage'a kaydedildi");
+            } catch(e) { console.error("localStorage kayıt hatası:", e); }
+
+            if (window._fbSave) {
+                window._fbSave();
+            } else {
+                console.warn("⚠️ Firebase henüz hazır değil, sadece localStorage'a kaydedildi");
+            }
         }
-        // Programı (schedule) kaydetmek için ayrı fonksiyon
-        function saveScheduleData() {
-            localStorage.setItem('kurumSavedSchedule', JSON.stringify(savedScheduleData));
-        }
-        // scheduleConfig'i kaydetmek için
-        function saveConfigData() {
-            localStorage.setItem('kurumScheduleConfig', JSON.stringify(scheduleConfig));
-        }
+
+        // Eski isimler korunuyor - hepsi aynı yere gidiyor
+        function saveData() { saveToCloud(); }
+        function saveScheduleData() { saveToCloud(); }
+        function saveConfigData() { saveToCloud(); }
+
+        // === MODULE'DEN ÇAĞRILACAK: Veriyi bu scope'a yükle ===
+        window.loadKurumData = function(data) {
+            // Dizileri temizle ve doldur (referans kırılmaz)
+            teachers.length = 0;
+            (data.teachers || []).forEach(t => teachers.push(t));
+            
+            students.length = 0;
+            (data.students || []).forEach(s => students.push(s));
+            
+            savedScheduleData.length = 0;
+            (data.savedSchedule || []).forEach(s => savedScheduleData.push(s));
+            
+            // scheduleConfig'i güncelle
+            if (data.scheduleConfig) {
+                Object.keys(scheduleConfig).forEach(k => delete scheduleConfig[k]);
+                Object.assign(scheduleConfig, data.scheduleConfig);
+            }
+            
+            // Ekranları yeniden çiz
+            renderTeachers();
+            renderStudents();
+            updateCounts();
+        };
+
+        // === MODULE'DEN ÇAĞRILACAK: Mevcut RAM verisini döndür ===
+        window.getKurumData = function() {
+            return {
+                teachers: teachers,
+                students: students,
+                scheduleConfig: scheduleConfig,
+                savedSchedule: savedScheduleData
+            };
+        };
+
+        // === SAYFA AÇILIŞINDA: localStorage'dan hemen yükle (Firebase beklemeden) ===
+        try {
+            const cached = localStorage.getItem('kurum_data');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                window.loadKurumData(parsed);
+                console.log("⚡ localStorage'dan veri yüklendi (hızlı başlatma)");
+            }
+        } catch(e) { console.warn("localStorage okuma hatası:", e); }
 
         function switchTab(tab) {
             ['teachers', 'students', 'programs', 'schedule'].forEach(t => {
@@ -1152,10 +1208,12 @@
         function executeScheduleDelete() {
             if(!confirm(`Seçilen ${assignmentsToDelete.size} dersi programdan kalıcı olarak kaldırmak istediğinize emin misiniz?`)) return;
 
-            savedScheduleData = savedScheduleData.filter(s => {
+            const toKeep = savedScheduleData.filter(s => {
                 const key = `${s.slotId}||${s.teacherId}||${s.studentId}`;
                 return !assignmentsToDelete.has(key);
             });
+            savedScheduleData.length = 0;
+            toKeep.forEach(s => savedScheduleData.push(s));
             saveScheduleData();
             
             scheduleAppMode = 'NORMAL';
@@ -1322,8 +1380,8 @@
             saveData(); renderStudents(); updateCounts(); closeModal('student');
         }
 
-        function deleteTeacher(id) { teachers = teachers.filter(t => t.id !== id); saveData(); renderTeachers(); updateCounts(); }
-        function deleteStudent(id) { students = students.filter(s => s.id !== id); saveData(); renderStudents(); updateCounts(); }
+        function deleteTeacher(id) { const idx = teachers.findIndex(t => t.id === id); if(idx > -1) teachers.splice(idx, 1); saveData(); renderTeachers(); updateCounts(); }
+        function deleteStudent(id) { const idx = students.findIndex(s => s.id === id); if(idx > -1) students.splice(idx, 1); saveData(); renderStudents(); updateCounts(); }
 
         // Arama Parametreli Render Fonksiyonları
         function renderTeachers(searchTerm = '') {
@@ -1396,10 +1454,6 @@
 
         // --- ZAMAN ÇİZELGESİ (SCHEDULE) SİSTEMİ (YENİ EKLENDİ) ---
         let specialBreaks = []; 
-        var scheduleConfig = JSON.parse(localStorage.getItem('kurumScheduleConfig')) || {
-            startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: []
-        };
-        window.scheduleConfig = scheduleConfig;
 
         function openScheduleModal() {
             document.getElementById('startTime').value = scheduleConfig.startTime;
@@ -1533,14 +1587,15 @@
         });
 
         function saveScheduleSettings() {
-            scheduleConfig = {
+            Object.keys(scheduleConfig).forEach(k => delete scheduleConfig[k]);
+            Object.assign(scheduleConfig, {
                 startTime: document.getElementById('startTime').value,
                 classDuration: parseInt(document.getElementById('classDuration').value),
                 breakDuration: parseInt(document.getElementById('breakDuration').value),
                 classCount: parseInt(document.getElementById('classCount').value),
                 specialBreaks: specialBreaks,
                 slots: generateSchedulePreview()
-            };
+            });
             window.scheduleConfig = scheduleConfig;
             saveConfigData();
             closeScheduleModal();
@@ -1550,7 +1605,8 @@
         let lastGeneratedSchedule = []; // Son oluşturulan programı hafızada tutmak için
 
         function saveGeneratedSchedule() {
-            savedScheduleData = lastGeneratedSchedule;
+            savedScheduleData.length = 0;
+            lastGeneratedSchedule.forEach(s => savedScheduleData.push(s));
             saveScheduleData();
             alert("Harika! Program başarıyla kaydedildi. Artık öğretmen ve öğrencilerin 'Programı Gör' butonuna tıklayarak atanan dersleri detaylıca görebilirsiniz.");
         }
@@ -2263,155 +2319,69 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        const firebaseConfig = { apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8", authDomain:"tripturkey-79e75.firebaseapp.com", projectId:"tripturkey-79e75", storageBucket:"tripturkey-79e75.firebasestorage.app", messagingSenderId:"69790477258", appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33" };
-        const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+        const app = initializeApp({ apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8", authDomain:"tripturkey-79e75.firebaseapp.com", projectId:"tripturkey-79e75", storageBucket:"tripturkey-79e75.firebasestorage.app", messagingSenderId:"69790477258", appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33" });
+        const auth = getAuth(app), db = getFirestore(app);
+        let currentUserUid = null;
 
-        // --- GERÇEK ZAMANLI FIREBASE SENKRONİZASYON MOTORU (v2) ---
-        window.currentUserId = null;
-        window.isFirebaseLoaded = false;
-        
-        // Bu bayrak, kendi yazdığımız veriyi onSnapshot tekrar alınca sonsuz döngüye girmemizi engeller
-        let _ignoreNextSnapshot = false;
-        // Debounce zamanlayıcı - her değişiklikte hemen yazmak yerine 1 sn bekle
-        let _syncTimer = null;
-        // Gerçek zamanlı dinleyiciyi durdurmak için
-        let _unsubscribeSnapshot = null;
-
-        // ====== BULUTA YAZMA (DEBOUNCE'LU) ======
-        window.syncToFirebase = function() {
-            if (!window.currentUserId || !window.isFirebaseLoaded) return;
-            
-            // Önceki zamanlayıcıyı iptal et (her tuş vuruşunda yazmayı önler)
-            clearTimeout(_syncTimer);
-            
-            _syncTimer = setTimeout(async () => {
-                try {
-                    _ignoreNextSnapshot = true; // Kendi yazdığımızı geri almamak için
-                    const dataToSave = {
-                        teachers: window.teachers || [],
-                        students: window.students || [],
-                        scheduleConfig: window.scheduleConfig || {},
-                        savedSchedule: window.savedScheduleData || [],
-                        _lastUpdated: Date.now() // Hangi yazmanın daha yeni olduğunu bilmek için
-                    };
-                    await setDoc(doc(db, "kurum_data", window.currentUserId), dataToSave);
-                    console.log("✅ Firebase'e yazıldı:", new Date().toLocaleTimeString());
-                } catch (e) { 
-                    console.error("Firebase yazma hatası:", e); 
-                    _ignoreNextSnapshot = false;
-                }
-            }, 1000); // 1 saniye debounce
-        };
-
-        // ====== BULUTTAN OKUMA (GERÇEK ZAMANLI) ======
-        function applyCloudData(kData) {
-            // RAM'deki değişkenleri güncelle
-            window.teachers = kData.teachers || [];
-            window.students = kData.students || [];
-            window.scheduleConfig = kData.scheduleConfig || { startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: [] };
-            window.savedScheduleData = kData.savedSchedule || [];
-            
-            // LocalStorage'ı da güncelle (sayfa yenilendiğinde hızlı yükleme için)
-            // originalSetItem kullanıyoruz ki hook tetiklenmesin
-            _origSetItem.call(localStorage, 'kurumTeachers', JSON.stringify(window.teachers));
-            _origSetItem.call(localStorage, 'kurumStudents', JSON.stringify(window.students));
-            _origSetItem.call(localStorage, 'kurumScheduleConfig', JSON.stringify(window.scheduleConfig));
-            _origSetItem.call(localStorage, 'kurumSavedSchedule', JSON.stringify(window.savedScheduleData));
-            
-            // Tüm ekranları yeniden çiz
-            if(typeof renderTeachers === 'function') renderTeachers();
-            if(typeof renderStudents === 'function') renderStudents();
-            if(typeof updateCounts === 'function') updateCounts();
-        }
-
-        function startRealtimeSync(userId) {
-            // Eski dinleyici varsa kapat
-            if (_unsubscribeSnapshot) _unsubscribeSnapshot();
-            
-            _unsubscribeSnapshot = onSnapshot(doc(db, "kurum_data", userId), (snapshot) => {
-                // Kendi yazdığımız veriyi geri almayı atla
-                if (_ignoreNextSnapshot) {
-                    _ignoreNextSnapshot = false;
-                    return;
-                }
-                
-                if (snapshot.exists()) {
-                    console.log("🔄 Buluttan gerçek zamanlı güncelleme geldi!");
-                    applyCloudData(snapshot.data());
-                }
-            }, (error) => {
-                console.error("onSnapshot hatası:", error);
-            });
-        }
-
-        // ====== HOOK SİSTEMİ (localStorage.setItem yakalanması) ======
-        const _origSetItem = localStorage.setItem;
-        localStorage.setItem = function(key, value) {
-            _origSetItem.apply(this, arguments);
-            if (['kurumTeachers', 'kurumStudents', 'kurumScheduleConfig', 'kurumSavedSchedule'].includes(key)) {
-                if (window.syncToFirebase) window.syncToFirebase();
+        // Ana script'teki saveToCloud() bunu çağıracak
+        window._fbSave = async function() {
+            if (!currentUserUid) {
+                console.warn("⚠️ Firebase: Giriş yapılmamış, sadece localStorage'a kaydedildi");
+                return;
             }
+            try {
+                const data = window.getKurumData();
+                await setDoc(doc(db, "kurum_data", currentUserUid), data);
+                console.log("✅ Firebase'e kaydedildi");
+            } catch(e) { console.error("Firebase kayıt hatası:", e); }
         };
 
-        // ====== ANA GİRİŞ NOKTASI ======
-        onAuthStateChanged(auth, async(user)=>{
-            const ac=document.getElementById('headerAuthContainer');
-            if(user){
-                window.currentUserId = user.uid;
-                let dn=user.displayName||"Profil";
+        onAuthStateChanged(auth, async(user) => {
+            const ac = document.getElementById('headerAuthContainer');
+            if (user) {
+                currentUserUid = user.uid;
+                let dn = user.displayName || "Profil";
                 try {
-                    // Kullanıcı Adı ve Admin Kontrolü
-                    const ud=await getDoc(doc(db,"users",user.uid));
-                    if(ud.exists()){
-                        const d=ud.data();
-                        if(d.username) dn=d.username;
-                        if(d.isAdmin===true && document.getElementById('sideMenuAdminBtn')) document.getElementById('sideMenuAdminBtn').style.display='';
+                    const ud = await getDoc(doc(db, "users", user.uid));
+                    if (ud.exists()) {
+                        const d = ud.data();
+                        if (d.username) dn = d.username;
+                        if (d.isAdmin === true && document.getElementById('sideMenuAdminBtn')) document.getElementById('sideMenuAdminBtn').style.display = '';
                     }
 
-                    // --- İLK YÜKLEME: Buluttaki veriyi bir kez çek ---
+                    // Kurum verilerini Firebase'den çek
                     const kurumDoc = await getDoc(doc(db, "kurum_data", user.uid));
-                    
                     if (kurumDoc.exists()) {
-                        // Bulutta veri var → RAM'e ve ekrana aktar
-                        applyCloudData(kurumDoc.data());
+                        const fbData = kurumDoc.data();
+                        window.loadKurumData(fbData);
+                        // Firebase verisini localStorage'a da yedekle
+                        try { localStorage.setItem('kurum_data', JSON.stringify(fbData)); } catch(le) {}
+                        console.log("✅ Firebase'den veri yüklendi (localStorage da güncellendi)");
                     } else {
-                        // Bulutta veri YOK → localStorage'daki mevcut veriyi Firebase'e yükle (bootstrapping)
-                        // Bu sayede ilk kez giriş yapan kullanıcının yerel verisi kaybolmaz
-                        console.log("☁️ Bulutta veri yok, mevcut yerel veri yükleniyor...");
-                        _ignoreNextSnapshot = true;
-                        await setDoc(doc(db, "kurum_data", user.uid), {
-                            teachers: window.teachers || [],
-                            students: window.students || [],
-                            scheduleConfig: window.scheduleConfig || {},
-                            savedSchedule: window.savedScheduleData || [],
-                            _lastUpdated: Date.now()
-                        });
+                        // Firebase'de veri yok ama localStorage'da varsa Firebase'e yükle
+                        const cached = localStorage.getItem('kurum_data');
+                        if (cached) {
+                            try {
+                                const localData = JSON.parse(cached);
+                                await setDoc(doc(db, "kurum_data", user.uid), localData);
+                                console.log("☁️ localStorage verisi Firebase'e aktarıldı");
+                            } catch(e) { console.warn("localStorage→Firebase aktarım hatası:", e); }
+                        }
                     }
-                    
-                    // Artık yükleme tamamlandı, yazma izni aç
-                    window.isFirebaseLoaded = true;
-                    
-                    // Gerçek zamanlı dinlemeyi başlat (başka cihazdan yapılan değişiklikler anında gelecek)
-                    startRealtimeSync(user.uid);
+                } catch(e) { console.error("Firebase yükleme hatası:", e); }
 
-                } catch(e) { console.error(e); }
-
-                ac.innerHTML='<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> '+dn+'</span>';
-                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='none';
-                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='none';
+                ac.innerHTML = '<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ' + dn + '</span>';
+                if (document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display = 'none';
+                if (document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display = 'none';
             } else {
-                // Çıkış yapıldığında sistemi sıfırla
-                window.currentUserId = null;
-                window.isFirebaseLoaded = false;
-                if (_unsubscribeSnapshot) { _unsubscribeSnapshot(); _unsubscribeSnapshot = null; }
-                ac.innerHTML='<button class="btn-outline" onclick="window.location.href=\'index.html?action=login\'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href=\'index.html?action=register\'">Kaydol</button>';
-                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='';
-                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='';
+                currentUserUid = null;
+                ac.innerHTML = '<button class="btn-outline" onclick="window.location.href=\'index.html?action=login\'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href=\'index.html?action=register\'">Kaydol</button>';
+                if (document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display = '';
+                if (document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display = '';
             }
-            // Yükleme ekranını kapat
-            setTimeout(()=>{document.getElementById('mainPageLoader').classList.add('hidden');},300);
+            setTimeout(() => { document.getElementById('mainPageLoader').classList.add('hidden'); }, 300);
         });
     </script>
 </body>
