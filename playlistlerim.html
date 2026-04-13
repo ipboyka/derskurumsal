@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Planlayıcı | Playlistlerim</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ============================================================
+           TEMA SİSTEMİ — ders.html ile birebir aynı değişkenler.
+           ============================================================ */
+        :root {
+            --color-primary:#007bff;--color-primary-hover:#0056b3;--color-primary-light:#e6f2ff;
+            --color-primary-lighter:#f0f8ff;--color-primary-border:#cce5ff;
+            --color-primary-shadow:rgba(0,123,255,0.2);--color-primary-shadow-md:rgba(0,123,255,0.3);
+            --color-success:#28a745;--color-success-hover:#218838;--color-success-light:#d4edda;
+            --color-success-border:#c3e6cb;--color-success-shadow:rgba(40,167,69,0.3);
+            --color-danger:#d9534f;--color-danger-hover:#c9302c;--color-danger-light:#ffeaea;--color-danger-border:#ffc2c2;
+            --color-warning:#ffc107;
+            --color-bg-page:#f4f7f6;--color-bg-card:#ffffff;--color-bg-input:#f8f9fa;--color-bg-hover:#e6f2ff;
+            --color-text-main:#333;--color-text-secondary:#555;--color-text-muted:#888;--color-text-light:#aaa;--color-text-placeholder:#95a5a6;
+            --color-border:#eef2f5;--color-border-medium:#dce4ec;--color-border-strong:#bdc3c7;
+            --shadow-xs:0 2px 4px rgba(0,0,0,0.04);--shadow-sm:0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md:0 4px 10px rgba(0,0,0,0.1);--shadow-card:0 8px 20px rgba(0,0,0,0.06);
+            --shadow-modal:0 10px 30px rgba(0,0,0,0.2);--shadow-primary:0 4px 10px var(--color-primary-shadow);
+            --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:20px;--radius-full:50%;
+            --transition-fast:all 0.2s ease;--transition-base:all 0.3s ease;
+        }
+        
+
+        * { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        body { background-color:var(--color-bg-page); color:var(--color-text-main); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+        /* --- HEADER --- */
+        .header{display:flex;justify-content:space-between;align-items:center;background-color:var(--color-bg-card);padding:14px 25px;box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06);margin:20px auto 15px auto;width:calc(100% - 40px);max-width:1400px;border-radius:var(--radius-lg);position:sticky;top:20px;z-index:100;flex-shrink:0;}
+        .logo-container{display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform 0.2s ease;}
+        .logo-container:hover{transform:scale(1.02);}
+        .logo-icon{width:28px;height:28px;background-color:var(--color-primary);color:white;border-radius:var(--radius-full);display:flex;justify-content:center;align-items:center;font-size:13px;box-shadow:var(--shadow-primary);}
+        .logo-text{font-size:16px;font-weight:700;color:var(--color-text-main);letter-spacing:0.5px;}
+        .header-center-title{position:absolute;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:var(--color-text-main);display:flex;align-items:center;gap:8px;}
+        .btn-outline { background-color:transparent; color:var(--color-primary); border:2px solid var(--color-primary); padding:8px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition-base); }
+        .btn-outline:hover { background-color:var(--color-primary); color:#fff; }
+        .btn-primary { background-color:var(--color-primary); color:#fff; border:none; padding:8px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition-base); box-shadow:var(--shadow-primary); }
+        .btn-primary:hover { background-color:var(--color-primary-hover); transform:translateY(-2px); }
+        .header-icon-btn { background:var(--color-bg-input); color:var(--color-text-secondary); border:1px solid var(--color-border); padding:8px 12px; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition-fast); display:flex; align-items:center; gap:6px; }
+        .header-icon-btn:hover { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
+        .menu-btn { display:flex; align-items:center; gap:10px; font-size:24px; color:var(--color-text-secondary); background:none; border:none; cursor:pointer; transition:color 0.2s ease,transform 0.2s ease; padding:5px 10px; }
+        .menu-text { font-size:16px; font-weight:700; }
+        .menu-btn:hover { color:var(--color-primary); transform:scale(1.05); }
+
+        /* --- REKLAM --- */
+        .ad-space-left,.ad-space-right { position:fixed; top:50%; transform:translateY(-50%); width:10vw; height:600px; max-height:80vh; background-color:#f8f9fa; border:2px dashed #ced4da; border-radius:12px; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:50; color:#adb5bd; font-weight:800; font-size:16px; text-align:center; box-shadow:inset 0 0 10px rgba(0,0,0,0.02); }
+        .ad-space-left { left:20px; } .ad-space-right { right:20px; }
+        @media(max-width:900px){ .ad-space-left,.ad-space-right{display:none!important;} }
+
+        /* --- ANA İÇERİK ALANI --- */
+        .template-content { width:calc(100% - 40px); max-width:1400px; margin:10px auto 20px auto; flex:1; min-height:0; background-color:var(--color-bg-card); border-radius:var(--radius-xl); box-shadow:0 15px 40px rgba(0,0,0,0.18), 0 5px 15px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden; }
+        .template-inner { flex:1; min-height:0; padding:25px 30px; overflow-y:auto; display:flex; flex-direction:column; }
+        .template-inner::-webkit-scrollbar { width:6px; }
+        .template-inner::-webkit-scrollbar-thumb { background:var(--color-primary-border); border-radius:6px; }
+
+        /* --- YAN MENÜ --- */
+        .menu-overlay { position:fixed; top:0;left:0;right:0;bottom:0; background-color:rgba(0,0,0,0.4); backdrop-filter:blur(3px); z-index:4000; opacity:0; visibility:hidden; transition:var(--transition-base); }
+        .menu-overlay.show { opacity:1; visibility:visible; }
+        .side-menu { position:fixed; top:0; right:-320px; width:300px; height:100vh; background-color:var(--color-bg-card); box-shadow:-5px 0 25px rgba(0,0,0,0.1); z-index:4001; transition:right 0.3s cubic-bezier(0.25,0.8,0.25,1); display:flex; flex-direction:column; }
+        .side-menu.open { right:0; }
+        .side-menu-header { display:flex; justify-content:space-between; align-items:center; padding:20px 25px; border-bottom:1px solid #eef2f5; background-color:#f8fbff; }
+        .side-menu-header h2 { font-size:18px; font-weight:800; color:var(--color-primary); display:flex; align-items:center; gap:10px; }
+        .close-menu-btn { background:none; border:none; font-size:28px; color:var(--color-text-light); cursor:pointer; transition:transform 0.2s,color 0.2s; line-height:1; }
+        .close-menu-btn:hover { color:var(--color-danger); transform:scale(1.1); }
+        .side-menu-content { padding:20px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+        .menu-item { display:flex; align-items:center; gap:15px; padding:12px 15px; color:var(--color-text-secondary); text-decoration:none; font-size:14px; font-weight:700; border-radius:10px; transition:var(--transition-fast); background-color:#fcfcfc; border:1px solid transparent; }
+        .menu-item:hover { background-color:var(--color-primary-lighter); color:var(--color-primary); border-color:var(--color-primary-border); transform:translateX(5px); }
+        .menu-item i { font-size:16px; color:var(--color-primary); width:20px; text-align:center; }
+        .menu-item.active-page { background-color:var(--color-primary-lighter); color:var(--color-primary); border-color:var(--color-primary-border); }
+
+        /* --- LOADER --- */
+        .page-loader { position:fixed; top:0;left:0; width:100%;height:100%; background:linear-gradient(135deg,#f4f7f6 0%,#e6f2ff 100%); z-index:9999; display:flex; justify-content:center; align-items:center; transition:opacity 0.5s ease,visibility 0.5s ease; }
+        .page-loader.hidden { opacity:0; visibility:hidden; }
+        .loader-content { display:flex; flex-direction:column; align-items:center; gap:15px; animation:floatLoader 2s infinite ease-in-out; }
+        .loader-logo { width:70px;height:70px;font-size:30px;box-shadow:0 8px 25px rgba(0,123,255,0.3); }
+        .loader-title { font-size:26px;font-weight:800;color:var(--color-text-main);letter-spacing:1px;margin-top:5px; }
+        .loader-text { font-size:13px;font-weight:600;color:#777;margin-top:5px;letter-spacing:0.5px; }
+        .spinner { width:40px;height:40px;border:4px solid #cce5ff;border-top:4px solid var(--color-primary);border-radius:var(--radius-full);animation:spin 1s linear infinite;margin-top:5px; }
+        @keyframes spin { 100%{transform:rotate(360deg);} }
+        @keyframes floatLoader { 0%{transform:translateY(0);} 50%{transform:translateY(-10px);} 100%{transform:translateY(0);} }
+
+        /* ================================================================= */
+        /*   PLAYLİSTLERİM — SAYFA İÇİ TASARIMLAR                           */
+        /* ================================================================= */
+
+        /* --- Üst Bar (Başlık + Butonlar) --- */
+        .pl-top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-shrink:0; }
+        .pl-top-bar h2 { font-size:22px; font-weight:800; color:var(--color-text-main); display:flex; align-items:center; gap:10px; }
+        .pl-top-bar h2 i { color:#ff0000; font-size:24px; }
+        .pl-top-bar-sub { font-size:13px; font-weight:600; color:var(--color-text-muted); }
+
+        /* --- Filtre Barı --- */
+        .pl-filter-bar { display:flex; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:2px solid #eef2f5; flex-wrap:wrap; flex-shrink:0; }
+        .pl-filter-group { display:flex; flex-direction:column; flex:0 0 auto; min-width:130px; }
+        .pl-filter-group.wide { flex:0 0 auto; }
+        .pl-filter-group label { font-size:11px; font-weight:800; color:var(--color-text-muted); margin-bottom:4px; }
+        .pl-filter-select { padding:8px; font-size:12px; font-weight:700; color:var(--color-primary); cursor:pointer; background-color:var(--color-primary-lighter); border:1px solid var(--color-border-medium); border-radius:var(--radius-md); outline:none; width:100%; }
+
+        /* --- Butonlar --- */
+        .pl-btn { display:flex; align-items:center; gap:8px; font-size:14px; padding:12px 20px; border-radius:10px; font-weight:700; cursor:pointer; transition:var(--transition-fast); border:none; }
+        .pl-btn-add { background-color:var(--color-primary); color:#fff; }
+        .pl-btn-add:hover { background-color:var(--color-primary-hover); transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,123,255,0.3); }
+        .pl-btn-delete { background-color:var(--color-danger-light); color:var(--color-danger); border:1px solid var(--color-danger-border); }
+        .pl-btn-delete:hover { background-color:var(--color-danger); color:#fff; }
+        .pl-btn-delete.active-mode { background-color:var(--color-danger); color:#fff; }
+        .pl-btn-cancel { background-color:#fff; color:var(--color-text-secondary); border:1px solid #ccc; padding:10px 20px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; transition:var(--transition-fast); }
+        .pl-btn-cancel:hover { background-color:#f0f0f0; }
+        .pl-btn-save { background-color:var(--color-primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; transition:var(--transition-fast); }
+        .pl-btn-save:hover { background-color:var(--color-primary-hover); transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,123,255,0.3); }
+        .pl-btn-save.green { background-color:var(--color-success); }
+        .pl-btn-save.green:hover { background-color:var(--color-success-hover); }
+
+        /* --- Playlist Grid --- */
+        .pl-grid { flex:1; overflow-y:auto; padding-right:5px; }
+        .pl-grid::-webkit-scrollbar { width:5px; }
+        .pl-grid::-webkit-scrollbar-thumb { background:var(--color-primary-border); border-radius:5px; }
+
+        .pl-placeholder { text-align:center; padding:40px; font-size:14px; color:var(--color-text-light); font-weight:600; border:2px dashed #f0f0f0; border-radius:var(--radius-lg); }
+        .pl-placeholder i { font-size:40px; color:var(--color-primary-border); margin-bottom:15px; display:block; }
+
+        /* --- Playlist Kartları --- */
+        .playlist-card { background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.03); transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s; cursor:pointer; position:relative; }
+        .playlist-card:hover { transform:translateY(-4px); box-shadow:0 8px 15px rgba(0,0,0,0.1); border-color:var(--color-primary-border); }
+        .playlist-card.selected-for-delete { border:2px solid #d9534f!important; background-color:#fff0f0; transform:scale(0.98); }
+        .playlist-card.selected-for-delete::before { content:'✓'; position:absolute; top:10px; left:10px; background:#d9534f; color:white; width:24px; height:24px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:14px; font-weight:bold; z-index:5; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+
+        /* --- Switch (Ana Playlist) --- */
+        .switch { position:relative; display:inline-block; width:36px; height:20px; }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; top:0;left:0;right:0;bottom:0; background-color:#ccc; transition:.3s; border-radius:20px; }
+        .slider:before { position:absolute; content:""; height:16px; width:16px; left:2px; bottom:2px; background-color:white; transition:.3s; border-radius:50%; }
+        input:checked + .slider { background-color:var(--color-warning); }
+        input:checked + .slider:before { transform:translateX(16px); }
+        .main-badge { position:absolute; top:10px; left:10px; background:rgba(255,193,7,0.9); color:#333; font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; z-index:5; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+
+        /* --- Badge (TYT/AYT) --- */
+        .badge-tyt { background:#e0f7fa; color:#17a2b8; }
+        .badge-ayt { background:#fff3cd; color:#856404; }
+        .task-card-badge { font-size:10px; font-weight:800; padding:2px 6px; border-radius:var(--radius-xs); letter-spacing:0.5px; flex-shrink:0; }
+
+        /* --- Premium Checkbox --- */
+        .premium-check-label { display:inline-flex; align-items:center; justify-content:center; }
+        .premium-check-label input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:var(--color-success); }
+
+        /* --- Modal (ekleme, görüntüleme, rename, onay) --- */
+        .pl-modal-overlay { display:none; position:fixed; z-index:5000; left:0;top:0; width:100%;height:100%; background-color:rgba(0,0,0,0.4); backdrop-filter:blur(4px); justify-content:center; align-items:center; animation:fadeIn 0.2s ease; }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        .pl-modal { background-color:var(--color-bg-card); border-radius:var(--radius-xl); box-shadow:0 15px 30px rgba(0,0,0,0.15); display:flex; flex-direction:column; overflow:hidden; animation:slideUp 0.3s ease; }
+        @keyframes slideUp { from{transform:translateY(20px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+        .pl-modal-header { padding:15px 25px; background-color:var(--color-bg-input); border-bottom:1px solid #eef2f5; display:flex; justify-content:space-between; align-items:center; }
+        .pl-modal-header h3 { font-size:16px; font-weight:800; color:var(--color-text-main); }
+        .pl-modal-close { font-size:24px; color:var(--color-text-light); cursor:pointer; transition:color 0.2s; line-height:1; background:none; border:none; }
+        .pl-modal-close:hover { color:var(--color-danger); }
+        .pl-modal-body { padding:25px; display:flex; flex-direction:column; gap:18px; }
+        .pl-modal-footer { padding:15px 25px; background-color:var(--color-bg-input); border-top:1px solid #eef2f5; display:flex; justify-content:flex-end; gap:12px; }
+        .input-group { display:flex; flex-direction:column; gap:6px; }
+        .input-group label { font-size:13px; font-weight:700; color:var(--color-text-secondary); margin-left:4px; }
+        .required-star { color:var(--color-danger); }
+        .modal-input { width:100%; padding:12px 15px; border:1px solid var(--color-border-medium); border-radius:10px; font-size:13px; font-family:inherit; color:var(--color-text-main); background-color:#fcfcfc; transition:border-color 0.2s,box-shadow 0.2s; outline:none; }
+        .modal-input:focus { border-color:var(--color-primary); box-shadow:0 0 0 3px rgba(0,123,255,0.1); background-color:#fff; }
+
+        /* --- Custom Select (Sınav/Alan/Ders seçimi) --- */
+        .tcs { position:relative; width:100%; user-select:none; }
+        .tcs-trigger { display:flex; justify-content:space-between; align-items:center; background-color:#fcfcfc; border:1px solid var(--color-border-medium); padding:12px 15px; border-radius:10px; font-size:13px; font-weight:700; color:var(--color-text-main); cursor:pointer; transition:var(--transition-fast); }
+        .tcs-trigger:hover { border-color:var(--color-primary); }
+        .tcs.open .tcs-trigger { border-color:var(--color-primary); border-bottom-left-radius:0; border-bottom-right-radius:0; box-shadow:0 4px 10px rgba(0,123,255,0.1); }
+        .tcs.open .tcs-trigger i { transform:rotate(180deg); }
+        .tcs-options { position:absolute; top:100%; left:0;right:0; background-color:#fff; border:1px solid var(--color-primary); border-top:none; border-bottom-left-radius:10px; border-bottom-right-radius:10px; box-shadow:0 8px 15px rgba(0,0,0,0.1); z-index:999; display:none; max-height:200px; overflow-y:auto; }
+        .tcs.open .tcs-options { display:block; }
+        .tcs-option { padding:10px 15px; font-size:13px; font-weight:600; color:var(--color-text-secondary); cursor:pointer; transition:background 0.2s; border-bottom:1px solid #f1f1f1; }
+        .tcs-option:last-child { border-bottom:none; }
+        .tcs-option:hover { background-color:var(--color-primary-lighter); color:var(--color-primary); }
+        .tcs-option.selected { background-color:var(--color-bg-hover); color:var(--color-primary); font-weight:800; }
+
+        /* --- Toast --- */
+        .action-toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background-color:var(--color-bg-card); padding:12px 25px; border-radius:50px; box-shadow:0 10px 30px rgba(0,0,0,0.15); z-index:9999; transition:all 0.5s cubic-bezier(0.68,-0.55,0.265,1.55); display:flex; align-items:center; border:1px solid var(--color-border); }
+        .action-toast.show { top:30px; }
+        .toast-content { display:flex; align-items:center; gap:12px; }
+        .toast-spinner { width:18px;height:18px;border:3px solid #f3f3f3;border-top:3px solid var(--color-primary);border-radius:var(--radius-full);animation:spin 1s linear infinite; }
+        #toastText { font-size:14px; font-weight:700; color:var(--color-text-main); }
+
+        /* --- Onay Modalı (centered) --- */
+        .pl-modal.centered { max-width:350px; text-align:center; padding:30px; }
+        .pl-modal.centered h3 { margin-bottom:10px; font-size:18px; }
+        .pl-modal.centered p { color:var(--color-text-muted); font-size:14px; margin-bottom:25px; }
+        .pl-modal.centered .modal-actions { display:flex; gap:12px; justify-content:center; }
+
+        /* --- ALT DERS DROPDOWN --- */
+        .pl-sub-lesson-select { width:100%; padding:10px 12px; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-size:14px; font-weight:700; background:var(--color-bg-card); color:var(--color-text-main); cursor:pointer; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><path fill=%22%23888%22 d=%22M8 11L2 5h12z%22/></svg>'); background-repeat:no-repeat; background-position:right 10px center; background-size:12px; padding-right:30px; }
+
+        /* --- Video Tablosu --- */
+        #youtubeVideoTable img { width:80px; border-radius:var(--radius-sm); box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+        #youtubeVideoTable td { padding:8px; border-bottom:1px solid #eef2f5; vertical-align:middle; color:var(--color-text-secondary); font-weight:600; }
+    </style>
+</head>
+<body>
+
+    <!-- LOADER -->
+    <div id="mainPageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="logo-icon loader-logo"><i class="fa-solid fa-play-circle"></i></div>
+            <h2 class="loader-title">Playlistlerim</h2>
+            <div class="spinner"></div>
+            <p class="loader-text">Playlistleriniz yükleniyor...</p>
+        </div>
+    </div>
+
+    <!-- REKLAMLAR -->
+    <div class="ad-space-left"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+    <div class="ad-space-right"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='ders.html'">
+            <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+            <h1 class="logo-text">Ders Planlayıcı</h1>
+        </div>
+        
+        <div class="header-center-title">
+            <i class="fa-solid fa-play-circle" style="color:var(--color-primary);"></i> Playlistlerim
+        </div>
+
+        <div style="display:flex;align-items:center;gap:15px;">
+            <div id="headerAuthContainer" style="display:flex;align-items:center;gap:10px;"></div>
+            <button class="menu-btn" title="Menü" id="openMenuBtn"><span class="menu-text">Menü</span><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <div class="template-content">
+        <div class="template-inner" id="playlistPageContent">
+
+            <!-- FİLTRE VE AKSİYON BARI -->
+            <div class="pl-filter-bar" style="justify-content: space-between; align-items: flex-end;">
+                <div style="display:flex; gap:15px; flex-wrap:wrap; flex:1;">
+                    <div class="pl-filter-group">
+                        <label>Sınav Türü</label>
+                        <div class="tcs" id="tcs-filterExam">
+                            <div class="tcs-trigger" style="padding:8px 12px;"><span class="tcs-text">Tüm Sınavlar</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;transition:transform 0.3s;"></i></div>
+                            <div class="tcs-options">
+                                <div class="tcs-option selected" data-value="all">Tüm Sınavlar</div>
+                                <div class="tcs-option" data-value="tyt">TYT</div>
+                                <div class="tcs-option" data-value="ayt">AYT</div>
+                            </div>
+                            <input type="hidden" id="filterExam" value="all">
+                        </div>
+                    </div>
+                    <div class="pl-filter-group" id="filterTrackGroup" style="display:none;">
+                        <label>Alan Seçimi</label>
+                        <div class="tcs" id="tcs-filterTrack">
+                            <div class="tcs-trigger" style="padding:8px 12px;"><span class="tcs-text">Tüm Alanlar</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;transition:transform 0.3s;"></i></div>
+                            <div class="tcs-options">
+                                <div class="tcs-option selected" data-value="all">Tüm Alanlar</div>
+                                <div class="tcs-option" data-value="sayisal">Sayısal</div>
+                                <div class="tcs-option" data-value="ea">Eşit Ağırlık</div>
+                                <div class="tcs-option" data-value="sozel">Sözel</div>
+                                <div class="tcs-option" data-value="dil">Yabancı Dil</div>
+                            </div>
+                            <input type="hidden" id="filterTrack" value="all">
+                        </div>
+                    </div>
+                    <div class="pl-filter-group" style="min-width: 180px;">
+                        <label>Ders Seçimi</label>
+                        <div class="tcs" id="tcs-filterSubject">
+                            <div class="tcs-trigger" style="padding:8px 12px;"><span class="tcs-text">Tüm Dersler</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;transition:transform 0.3s;"></i></div>
+                            <div class="tcs-options" id="filterSubjectOptions">
+                                <div class="tcs-option selected" data-value="all">Tüm Dersler</div>
+                            </div>
+                            <input type="hidden" id="filterSubject" value="all">
+                        </div>
+                    </div>
+                    <div class="pl-filter-group" id="filterSubLessonGroup" style="display:none;">
+                        <label>Alt Dersler</label>
+                        <div class="tcs" id="tcs-filterSubLesson">
+                            <div class="tcs-trigger" style="padding:8px 12px;"><span class="tcs-text">Tüm Alt Dersler</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;transition:transform 0.3s;"></i></div>
+                            <div class="tcs-options" id="filterSubLessonOptions">
+                                <div class="tcs-option selected" data-value="all">Tüm Alt Dersler</div>
+                            </div>
+                            <input type="hidden" id="filterSubLesson" value="all">
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="pl-btn pl-btn-delete" id="toggleDeleteModeBtn"><i class="fa-solid fa-trash"></i> Kaldır</button>
+                    <button class="pl-btn pl-btn-add" id="addNewPlaylistBtn"><i class="fa-solid fa-plus"></i> Yeni Playlist Ekle</button>
+                </div>
+            </div>
+
+            <!-- PLAYLİST GRİD -->
+            <div class="pl-grid" id="playlistsGrid">
+                <div class="pl-placeholder"><i class="fa-brands fa-youtube"></i>Yükleniyor...</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST BİLDİRİM -->
+    <div class="action-toast" id="actionToast">
+        <div class="toast-content">
+            <div class="toast-spinner"></div>
+            <span id="toastText">İşlem yapılıyor...</span>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--   MODALLER                                                    -->
+    <!-- ============================================================ -->
+
+    <!-- PLAYLIST EKLEME MODALI -->
+    <div class="pl-modal-overlay" id="addPlaylistModal">
+        <div class="pl-modal" style="max-width:920px;width:95%;">
+            <div class="pl-modal-header">
+                <h3><i class="fa-solid fa-link" style="color:var(--color-primary);margin-right:8px;"></i> Playlist Aktar</h3>
+                <button class="pl-modal-close" id="closeAddModal">&times;</button>
+            </div>
+            
+            <div class="pl-modal-body" style="flex-direction:row; gap:30px; align-items: stretch; flex-wrap: wrap;">
+                
+                <div style="flex:1.3; display:flex; flex-direction:column; gap:20px; min-width: 400px;">
+                    
+                    <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:nowrap;">
+                        <div class="input-group" style="flex: 0 0 auto; min-width: 100px;">
+                            <label>Sınav Türü</label>
+                            <div class="tcs" id="tcs-examType">
+                                <div class="tcs-trigger" style="padding:10px 12px;"><span class="tcs-text">TYT</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div>
+                                <div class="tcs-options">
+                                    <div class="tcs-option selected" data-value="tyt">TYT</div>
+                                    <div class="tcs-option" data-value="ayt">AYT</div>
+                                </div>
+                                <input type="hidden" id="playlistExamType" value="tyt">
+                            </div>
+                        </div>
+                        <div class="input-group" id="playlistTrackGroup" style="flex: 0 0 auto; min-width: 120px; display:none;">
+                            <label>Alan</label>
+                            <div class="tcs" id="tcs-track">
+                                <div class="tcs-trigger" style="padding:10px 12px;"><span class="tcs-text">Sayısal</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div>
+                                <div class="tcs-options">
+                                    <div class="tcs-option selected" data-value="sayisal">Sayısal</div>
+                                    <div class="tcs-option" data-value="ea">Eşit Ağırlık</div>
+                                    <div class="tcs-option" data-value="sozel">Sözel</div>
+                                    <div class="tcs-option" data-value="dil">Yabancı Dil</div>
+                                </div>
+                                <input type="hidden" id="playlistTrack" value="sayisal">
+                            </div>
+                        </div>
+                        <div class="input-group" style="flex:1;">
+                            <label>Ders Seçimi</label>
+                            <div class="tcs" id="tcs-subject">
+                                <div class="tcs-trigger" style="padding:10px 12px;"><span class="tcs-text">Türkçe</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div>
+                                <div class="tcs-options" id="dynamicSubjectOptions">
+                                    <div class="tcs-option selected" data-value="Türkçe">Türkçe</div>
+                                    <div class="tcs-option" data-value="Sosyal Bilimler">Sosyal Bilimler</div>
+                                    <div class="tcs-option" data-value="Temel Matematik">Temel Matematik</div>
+                                    <div class="tcs-option" data-value="Fen Bilimleri">Fen Bilimleri</div>
+                                </div>
+                                <input type="hidden" id="playlistSubject" value="Türkçe">
+                            </div>
+                        </div>
+                        <div class="input-group" id="playlistSubLessonGroup" style="flex:1.5; display:none;">
+                            <label>Alt Ders</label>
+                            <div class="tcs" id="tcs-playlistSubLesson">
+                                <div class="tcs-trigger" style="padding:10px 12px;"><span class="tcs-text">Seçiniz</span> <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div>
+                                <div class="tcs-options" id="dynamicSubLessonOptions"></div>
+                                <input type="hidden" id="playlistSubLesson" value="">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Playlist Adı <span class="required-star">*</span></label>
+                        <input type="text" id="playlistTitleInput" class="modal-input" placeholder="Örn: Dr. Biyoloji Sistemler Kampı" style="padding:12px;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>YouTube Playlist Linki <span class="required-star">*</span></label>
+                        <div style="display:flex;gap:10px;">
+                            <input type="text" id="playlistLinkInput" class="modal-input" placeholder="https://www.youtube.com/playlist?list=..." style="flex:1; padding:12px;">
+                            <button class="pl-btn-save" id="fetchPlaylistBtn" style="flex-shrink:0;"><i class="fa-solid fa-cloud-arrow-down"></i> Videoları Bul</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="flex:1; display:flex; flex-direction:column; min-width:320px;">
+                    <div style="background: var(--color-bg-input); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border: 1px solid var(--color-border-medium);">
+                        <h4 style="margin:0; font-size: 14px; font-weight: 800; color: var(--color-text-main);"><i class="fa-solid fa-list-ul" style="color:var(--color-primary); margin-right:5px;"></i> Video Listesi</h4>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span id="ytDurationBadge" style="display:none; background: #e0f7fa; color: #00838f; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px;"><i class="fa-solid fa-stopwatch"></i> 0dk</span>
+                            <span id="ytVideoCountBadge" style="background: var(--color-primary-lighter); color: var(--color-primary); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">0 Video</span>
+                        </div>
+                    </div>
+                    
+                    <div id="youtubeTabloGovdesi" style="height:165px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:5px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; background:#fff; border-radius:12px; border:2px dashed #eef2f5; width:100%; box-sizing:border-box;">
+                            <i class="fa-brands fa-youtube" style="font-size:35px; margin-bottom:12px; display:block; color:#ff0000; opacity:0.8;"></i>
+                            <p style="font-size:13px; font-weight:600; color:var(--color-text-muted); margin:0; text-align:center; padding:0 20px;">Link girip "Videoları Bul" butonuna basınız.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="pl-modal-footer" style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--color-border-medium);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:13px; font-weight:800; color:var(--color-text-main);"><i class="fa-solid fa-star" style="color:#ffc107;"></i> Ana Playlist</span>
+                    <label class="switch" style="margin:0;">
+                        <input type="checkbox" id="isMainPlaylistSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="display:flex; gap: 15px;">
+                    <button class="pl-btn-cancel" id="cancelAddBtn" style="padding: 10px 24px; font-size: 13px; font-weight: 800;">İptal</button>
+                    <button class="pl-btn-save green" id="confirmSaveBtn" style="display:none; padding: 10px 24px; font-size: 13px; font-weight: 800;">Listeyi Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLAYLIST DETAY (GÖRÜNTÜLEME) MODALI -->
+    <div class="pl-modal-overlay" id="viewPlaylistModal">
+        <div class="pl-modal" style="max-width:750px;width:95%;max-height:85vh;display:flex;flex-direction:column;">
+            <div class="pl-modal-header">
+                <h3>
+                    <i class="fa-solid fa-list" style="color:var(--color-primary);margin-right:8px;"></i>
+                    <span id="vp-title">Playlist Detayı</span>
+                    <i class="fa-solid fa-pen" id="editTitleIcon" style="font-size:14px;color:var(--color-text-light);cursor:pointer;margin-left:10px;transition:color 0.2s;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-text-light)'"></i>
+                </h3>
+                <button class="pl-modal-close" id="closeViewModal">&times;</button>
+            </div>
+            <div class="pl-modal-body" style="overflow-y:auto;padding:15px;flex:1;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:1px;padding:10px 15px;background:var(--color-bg-hover);border-radius:var(--radius-md);color:var(--color-primary);font-weight:bold;border:1px solid var(--color-primary-border);">
+                    <span id="vp-count"><i class="fa-solid fa-video"></i> 0 Video</span>
+                    <span id="vp-duration"><i class="fa-solid fa-stopwatch"></i> 0 Saat 0 Dk</span>
+                    <span id="vp-progress"><i class="fa-solid fa-percent"></i> %0 Tamamlandı</span>
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead style="position:sticky;top:-15px;background:var(--color-bg-card);z-index:10;">
+                        <tr style="text-align:left;color:var(--color-text-secondary);border-bottom:2px solid var(--color-primary-border);">
+                            <th style="padding:8px;width:40px;">No</th><th style="padding:8px;width:90px;">Kapak</th><th style="padding:8px;">Video Adı</th><th style="padding:8px;width:80px;">Süre</th><th style="padding:8px;width:60px;text-align:center;">İzlendi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vp-tbody"></tbody>
+                </table>
+            </div>
+            <div class="pl-modal-footer" style="padding:15px;">
+                <button class="pl-btn-cancel" id="cancelViewBtn" style="margin-right:12px;">Kapat</button>
+                <button class="pl-btn-save green" id="saveProgressBtn"><i class="fa-solid fa-floppy-disk"></i> İlerlemeyi Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RENAME MODALI -->
+    <div class="pl-modal-overlay" id="renameModal">
+        <div class="pl-modal" style="max-width:400px;width:95%;">
+            <div class="pl-modal-header">
+                <h3>Playlist Adını Düzenle</h3>
+                <button class="pl-modal-close" id="closeRenameModal">&times;</button>
+            </div>
+            <div class="pl-modal-body">
+                <div class="input-group">
+                    <label>Yeni Playlist Adı</label>
+                    <input type="text" id="newNameInput" class="modal-input" placeholder="Örn: Limit Türev İntegral Kampı">
+                </div>
+            </div>
+            <div class="pl-modal-footer">
+                <button class="pl-btn-cancel" id="cancelRenameBtn">İptal Et</button>
+                <button class="pl-btn-save" id="saveRenameBtn">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KAYDET ONAY MODALI -->
+    <div class="pl-modal-overlay" id="saveConfirmModal">
+        <div class="pl-modal centered">
+            <i class="fa-solid fa-circle-question" style="font-size:40px;color:var(--color-primary);margin-bottom:15px;"></i>
+            <h3>İlerlemeyi Kaydet</h3>
+            <p>İzlenme durumundaki değişiklikleri kaydetmek istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="pl-btn-cancel" onclick="document.getElementById('saveConfirmModal').style.display='none'">Hayır, Dön</button>
+                <button class="pl-btn-save" id="yesSaveBtn">Evet, Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÇIKIŞ ONAY MODALI -->
+    <div class="pl-modal-overlay" id="cancelConfirmModal">
+        <div class="pl-modal centered">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:40px;color:var(--color-danger);margin-bottom:15px;"></i>
+            <h3>Kaydedilmemiş Değişiklikler</h3>
+            <p>Kaydetmediğiniz ilerleme değişiklikleri var. Çıkmak istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="pl-btn-cancel" onclick="document.getElementById('cancelConfirmModal').style.display='none'">Hayır, Kal</button>
+                <button class="pl-btn-save" id="yesCancelBtn" style="background-color:var(--color-danger);">Evet, Çık</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SİLME ONAY MODALI -->
+    <div class="pl-modal-overlay" id="deleteConfirmModal">
+        <div class="pl-modal centered">
+            <i class="fa-solid fa-trash-can" style="font-size:40px;color:var(--color-danger);margin-bottom:15px;"></i>
+            <h3>Playlistleri Sil</h3>
+            <p id="deleteConfirmMsg">Seçilen playlistleri kalıcı olarak silmek istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="pl-btn-cancel" onclick="document.getElementById('deleteConfirmModal').style.display='none'">İptal</button>
+                <button class="pl-btn-save" id="yesDeleteBtn" style="background-color:var(--color-danger);">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UYARI MODALI -->
+    <div class="pl-modal-overlay" id="alertModal">
+        <div class="pl-modal centered" style="border-top:5px solid var(--color-danger);">
+            <i class="fa-solid fa-circle-exclamation" style="font-size:40px;color:var(--color-danger);margin-bottom:15px;"></i>
+            <h3>Eksik Bilgi</h3>
+            <p id="alertMessage">Lütfen gerekli alanları doldurun.</p>
+            <div class="modal-actions">
+                <button class="pl-btn-save" onclick="document.getElementById('alertModal').style.display='none'" style="width:100%;background-color:var(--color-danger);">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YAN MENÜ -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2><i class="fa-solid fa-compass"></i> Menü</h2>
+            <button class="close-menu-btn" id="closeMenuBtn">&times;</button>
+        </div>
+        <div class="side-menu-content">
+            <a href="#" id="goHomeBtn" class="menu-item"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="ders.html" class="menu-item"><i class="fa-solid fa-book-open-reader"></i> Ders Çalış</a>
+            <a href="haftalikplanlayici.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Haftalık Planlayıcı</a>
+            <a href="playlistlerim.html" class="menu-item active-page"><i class="fa-brands fa-youtube"></i> Playlistlerim</a>
+            <a href="denemeanaliz.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Deneme Analiz</a>
+            <a href="playlistmerkezi.html" class="menu-item"><i class="fa-brands fa-youtube" style="color:#ff3333;"></i> Playlist Merkezi</a>
+            <a href="profilayarlar.html" class="menu-item" id="sideMenuProfileBtn"><i class="fa-solid fa-user-gear"></i> Profil / Ayarlar</a>
+            <a href="admin.html" class="menu-item" id="sideMenuAdminBtn" style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Paneli</a>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <a href="index.html?action=login" class="menu-item" id="sideMenuLoginBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</a>
+                <a href="index.html?action=register" class="menu-item" id="sideMenuRegisterBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> Kaydol</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--   JAVASCRIPT                                                  -->
+    <!-- ============================================================ -->
+    <script>
+        // --- AKILLI ÖLÇEKLENDİRME ---
+        function applySmartScale(){const w=window.innerWidth,h=window.innerHeight,els=document.querySelectorAll('.header,.template-content');if(w>900){const s=Math.min((w-380)/1400,h/900,1);els.forEach(e=>e.style.zoom=s);document.body.style.paddingBottom=Math.round(45*s)+'px';}else{els.forEach(e=>e.style.zoom=1);document.body.style.paddingBottom='45px';}}
+        let _st=null;window.addEventListener('resize',()=>{clearTimeout(_st);_st=setTimeout(applySmartScale,80);});window.addEventListener('DOMContentLoaded',applySmartScale);applySmartScale();
+
+        // --- YAN MENÜ ---
+        const sideMenu=document.getElementById('sideMenu'),menuOverlay=document.getElementById('menuOverlay');
+        document.getElementById('openMenuBtn').addEventListener('click',()=>{sideMenu.classList.add('open');menuOverlay.classList.add('show');});
+        document.getElementById('closeMenuBtn').addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        menuOverlay.addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        document.getElementById('goHomeBtn').addEventListener('click',e=>{e.preventDefault();sideMenu.classList.remove('open');menuOverlay.classList.remove('show');sessionStorage.setItem('fromDers','true');window.location.href='index.html';});
+
+        // --- CUSTOM SELECT (TCS) MANTIK (YENİ GLOBAL YAPI) ---
+        document.addEventListener('click', e => {
+            const trigger = e.target.closest('.tcs-trigger');
+            if (trigger) {
+                const select = trigger.closest('.tcs');
+                document.querySelectorAll('.tcs').forEach(s => { if(s !== select) s.classList.remove('open'); });
+                select.classList.toggle('open');
+                return;
+            }
+            const option = e.target.closest('.tcs-option');
+            if (option) {
+                const select = option.closest('.tcs');
+                const hidden = select.querySelector('input[type="hidden"]');
+                const textEl = select.querySelector('.tcs-text');
+                
+                select.querySelectorAll('.tcs-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                textEl.textContent = option.textContent;
+                hidden.value = option.getAttribute('data-value');
+                select.classList.remove('open');
+                
+                // Seçim yapıldığında gizli input üzerinde change eventi tetikliyoruz ki filtreler çalışsın
+                hidden.dispatchEvent(new Event('change')); 
+                return;
+            }
+            document.querySelectorAll('.tcs').forEach(s => s.classList.remove('open'));
+        });
+    </script>
+
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import{getFirestore,doc,setDoc,getDoc,collection,getDocs,deleteDoc}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const app=initializeApp({apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8",authDomain:"tripturkey-79e75.firebaseapp.com",projectId:"tripturkey-79e75",storageBucket:"tripturkey-79e75.firebasestorage.app",messagingSenderId:"69790477258",appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33"});
+        const auth=getAuth(app),db=getFirestore(app);
+        let currentUserUid=null,savedPlaylists=[];
+
+        // --- YARDIMCI FONKSİYONLAR ---
+        const YT_API_KEY='AIzaSyB8W8bN9pcrMuFfr3vSC-YqEPHq7hN93XQ';
+        function extractPlaylistId(url){const m=url.match(/[&?]list=([^&]+)/i);return m?m[1]:null;}
+        function parseDuration(d){const m=d.match(/PT(\d+H)?(\d+M)?(\d+S)?/);const h=parseInt(m[1])||0,mi=parseInt(m[2])||0,s=parseInt(m[3])||0;let r='';if(h>0)r+=h+':';r+=(mi<10?'0'+mi:mi)+':';r+=(s<10?'0'+s:s);return r;}
+        function parseDurationToSeconds(d){const m=d.match(/PT(\d+H)?(\d+M)?(\d+S)?/);return(parseInt(m[1])||0)*3600+(parseInt(m[2])||0)*60+(parseInt(m[3])||0);}
+        function formatSecondsToText(t){const h=Math.floor(t/3600),m=Math.floor(t%3600/60);return h>0?`${h}s ${m}dk`:`${m}dk`;}
+        function timeStringToSeconds(t){if(!t)return 0;const p=t.split(':').map(Number).reverse();let s=0;if(p[0])s+=p[0];if(p[1])s+=p[1]*60;if(p[2])s+=p[2]*3600;return s;}
+        function showAlert(msg){document.getElementById('alertMessage').innerText=msg;document.getElementById('alertModal').style.display='flex';}
+        function showToast(msg,duration=2000){const t=document.getElementById('actionToast'),txt=document.getElementById('toastText');txt.innerText=msg;t.classList.add('show');t.querySelector('.toast-spinner').style.display='block';setTimeout(()=>{txt.innerText=msg.replace('...','!').replace('Kaydediliyor','Kaydedildi').replace('Siliniyor','Silindi');t.querySelector('.toast-spinner').style.display='none';setTimeout(()=>{t.classList.remove('show');setTimeout(()=>{t.querySelector('.toast-spinner').style.display='block';},500);},duration);},800);}
+
+        // --- PLAYLIST MODAL DİNAMİK DROPDOWNLARI (TCS) ---
+        const subLessonData={"Sosyal Bilimler":["Genel","Tarih","Coğrafya","Felsefe","Din Kültürü ve Ahlak Bilgisi"],"Fen Bilimleri":["Genel","Fizik","Kimya","Biyoloji"]};
+        
+        document.getElementById('playlistExamType').addEventListener('change', (e) => {
+            document.getElementById('playlistTrackGroup').style.display = e.target.value === 'ayt' ? 'flex' : 'none';
+            updateSubjectDropdown();
+        });
+        document.getElementById('playlistTrack').addEventListener('change', updateSubjectDropdown);
+        document.getElementById('playlistSubject').addEventListener('change', (e) => updateSubLessonDropdown(e.target.value));
+
+        function updateSubjectDropdown(){
+            const type=document.getElementById('playlistExamType').value;
+            const track=document.getElementById('playlistTrack').value;
+            const container=document.getElementById('dynamicSubjectOptions');
+            const textEl=document.querySelector('#tcs-subject .tcs-text');
+            const hidden=document.getElementById('playlistSubject');
+            container.innerHTML=''; let subjects=[];
+            
+            if(type==='tyt') subjects=["Türkçe","Sosyal Bilimler","Temel Matematik","Fen Bilimleri"];
+            else if(type==='ayt'){
+                if(track==='sayisal') subjects=["Matematik","Fizik","Kimya","Biyoloji"];
+                else if(track==='ea') subjects=["Matematik","Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1"];
+                else if(track==='sozel') subjects=["Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1","Tarih-2","Coğrafya-2","Felsefe Grubu","Din Kültürü ve Ahlak Bilgisi"];
+                else if(track==='dil') subjects=["Yabancı Dil"];
+            }
+            
+            subjects.forEach((s,i)=>{container.innerHTML+=`<div class="tcs-option ${i===0?'selected':''}" data-value="${s}">${s}</div>`;});
+            hidden.value = subjects[0]||''; textEl.textContent = subjects[0]||'Seçiniz';
+            updateSubLessonDropdown(subjects[0]||'');
+        }
+
+        function updateSubLessonDropdown(subject){
+            const group=document.getElementById('playlistSubLessonGroup');
+            const container=document.getElementById('dynamicSubLessonOptions');
+            const hidden=document.getElementById('playlistSubLesson');
+            const textEl=document.querySelector('#tcs-playlistSubLesson .tcs-text');
+            if(!group||!container) return;
+            
+            const opts=subLessonData[subject];
+            if(!opts){
+                group.style.display='none'; container.innerHTML=''; hidden.value='';
+                return;
+            }
+            group.style.display='';
+            container.innerHTML=opts.map((o,i)=>`<div class="tcs-option ${i===0?'selected':''}" data-value="${o}">${o}</div>`).join('');
+            hidden.value=opts[0]; textEl.textContent=opts[0];
+        }
+
+        // --- FİLTRELEME (TCS UYUMLU) ---
+        const filterSubjectsData={tyt:["Türkçe","Sosyal Bilimler","Temel Matematik","Fen Bilimleri","Genel Deneme"],ayt:{sayisal:["Matematik","Fizik","Kimya","Biyoloji","Genel Deneme"],ea:["Matematik","Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1","Genel Deneme"],sozel:["Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1","Tarih-2","Coğrafya-2","Felsefe Grubu","Din Kültürü ve Ahlak Bilgisi","Genel Deneme"],dil:["Yabancı Dil","Genel Deneme"]}};
+        const filterSubLessonData={"Sosyal Bilimler":["Genel","Tarih","Coğrafya","Felsefe","Din Kültürü ve Ahlak Bilgisi"],"Fen Bilimleri":["Genel","Fizik","Kimya","Biyoloji"]};
+        
+        const filterExam=document.getElementById('filterExam'), filterTrack=document.getElementById('filterTrack'), filterSubject=document.getElementById('filterSubject'), filterSubLesson=document.getElementById('filterSubLesson');
+
+        function buildTCSOptions(containerId, hiddenId, textSelector, optionsArray, defaultText, defaultVal) {
+            const container = document.getElementById(containerId);
+            const hidden = document.getElementById(hiddenId);
+            const textEl = document.querySelector(textSelector);
+            if(!container || !hidden || !textEl) return;
+            
+            let html = `<div class="tcs-option selected" data-value="${defaultVal}">${defaultText}</div>`;
+            optionsArray.forEach(o => { html += `<div class="tcs-option" data-value="${o}">${o}</div>`; });
+            
+            container.innerHTML = html;
+            hidden.value = defaultVal;
+            textEl.textContent = defaultText;
+        }
+
+        function updateFilterSubjects(){
+            if(!filterExam||!filterTrack||!filterSubject)return;
+            const ex=filterExam.value, tr=filterTrack.value;
+            let subs=[];
+            if(ex==='tyt') subs=filterSubjectsData.tyt;
+            else if(ex==='ayt'){
+                if(tr!=='all') subs=filterSubjectsData.ayt[tr]||[];
+                else {
+                    const all=new Set([...filterSubjectsData.ayt.sayisal,...filterSubjectsData.ayt.ea,...filterSubjectsData.ayt.sozel,...filterSubjectsData.ayt.dil]);
+                    subs=Array.from(all);
+                }
+            }
+            buildTCSOptions('filterSubjectOptions', 'filterSubject', '#tcs-filterSubject .tcs-text', subs, 'Tüm Dersler', 'all');
+            updateFilterSubLessons();
+        }
+
+        function updateFilterSubLessons(){
+            const group=document.getElementById('filterSubLessonGroup');
+            if(!filterSubLesson || !group) return;
+            const selectedSubject=filterSubject?filterSubject.value:'all';
+            const examType=filterExam?filterExam.value:'all';
+            const subOpts=filterSubLessonData[selectedSubject];
+            
+            if(subOpts && examType==='tyt'){
+                group.style.display='';
+                buildTCSOptions('filterSubLessonOptions', 'filterSubLesson', '#tcs-filterSubLesson .tcs-text', subOpts, 'Tüm Alt Dersler', 'all');
+            } else {
+                group.style.display='none';
+                buildTCSOptions('filterSubLessonOptions', 'filterSubLesson', '#tcs-filterSubLesson .tcs-text', [], 'Tüm Alt Dersler', 'all');
+            }
+        }
+
+        if(filterExam){
+            filterExam.addEventListener('change', () => {
+                const trackGroup = document.getElementById('filterTrackGroup');
+                const tcsTrackText = document.querySelector('#tcs-filterTrack .tcs-text');
+                if(filterExam.value === 'ayt') {
+                    trackGroup.style.display = '';
+                } else {
+                    trackGroup.style.display = 'none';
+                    filterTrack.value = 'all';
+                    if(tcsTrackText) tcsTrackText.textContent = 'Tüm Alanlar';
+                }
+                updateFilterSubjects();
+                renderPlaylists();
+            });
+        }
+        if(filterTrack) filterTrack.addEventListener('change',()=>{updateFilterSubjects();renderPlaylists();});
+        if(filterSubject) filterSubject.addEventListener('change',()=>{updateFilterSubLessons();renderPlaylists();});
+        if(filterSubLesson) filterSubLesson.addEventListener('change',()=>renderPlaylists());
+
+        // --- PLAYLİST RENDER ---
+        function renderPlaylists(){
+            const grid=document.getElementById('playlistsGrid');if(!grid)return;
+            const ex=filterExam?filterExam.value:'all',tr=filterTrack?filterTrack.value:'all',su=filterSubject?filterSubject.value:'all',sl=filterSubLesson?filterSubLesson.value:'all';
+            let filtered=savedPlaylists;
+            if(ex!=='all'){filtered=filtered.filter(p=>p.examType===ex);if(ex==='ayt'&&tr!=='all')filtered=filtered.filter(p=>p.track===tr);}
+            if(su!=='all')filtered=filtered.filter(p=>p.subject===su||p.parentSubject===su);
+            if(sl!=='all')filtered=filtered.filter(p=>p.subLesson===sl||p.subject===sl);
+            grid.innerHTML='';
+            if(filtered.length===0){grid.innerHTML='<div class="pl-placeholder"><i class="fa-brands fa-youtube"></i>Bu filtrelere uygun playlist bulunamadı veya henüz eklemedin!</div>';return;}
+            const grouped={};filtered.forEach(pl=>{if(!grouped[pl.subject])grouped[pl.subject]=[];grouped[pl.subject].push(pl);});
+            for(const[subjectName,lists]of Object.entries(grouped)){
+                let html=`<div style="margin-bottom:30px;"><h3 style="font-size:16px;font-weight:800;color:var(--color-primary);border-bottom:2px solid #eef2f5;padding-bottom:8px;margin-bottom:15px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-layer-group"></i> ${subjectName} Playlistleri</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">`;
+                lists.forEach(pl=>{
+                    const badgeClass=pl.examType==='tyt'?'badge-tyt':'badge-ayt';const examText=pl.examType.toUpperCase();
+                    const isSelected=selectedPlaylists.has(pl.id.toString())?'selected-for-delete':'';
+                    const mainBadge=pl.isMain?'<div class="main-badge"><i class="fa-solid fa-star"></i> Ana</div>':'';
+                    let watchedSec=0,totalSec=0;if(pl.videos&&pl.videos.length>0){pl.videos.forEach(v=>{const s=timeStringToSeconds(v.duration);totalSec+=s;if(v.isWatched)watchedSec+=s;});}
+                    let pct=totalSec>0?Math.round(watchedSec/totalSec*100):0;
+                    let pctColor='#aaa';if(pct>0&&pct<100)pctColor='#20c997';if(pct===100)pctColor='#ffc107';
+                    const isMainChecked=pl.isMain?'checked':'';
+                    html+=`<div class="playlist-card ${isSelected}" onclick="window.handlePlaylistClick('${pl.id}')"><div style="position:relative;height:150px;background:#111;">${mainBadge}<img src="${pl.firstVideoThumb}" style="width:100%;height:100%;object-fit:cover;opacity:0.85;"><div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.8);color:white;padding:4px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:bold;border:1px solid rgba(255,255,255,0.2);display:flex;gap:8px;align-items:center;"><span><i class="fa-solid fa-list-ul"></i> ${pl.videoCount}</span><span style="color:#b3d7ff;font-weight:normal;">|</span><span><i class="fa-regular fa-clock"></i> ${pl.totalDuration||'?'}</span><span style="color:#b3d7ff;font-weight:normal;">|</span><span style="color:${pctColor};"><i class="fa-solid fa-chart-pie"></i> %${pct}</span></div></div><div style="padding:15px;"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;"><h4 style="margin:0;font-size:16px;color:var(--color-text-main);font-weight:800;padding-right:10px;">${pl.customTitle||pl.subject}</h4><span class="task-card-badge ${badgeClass}" style="font-size:10px;padding:3px 6px;">${examText}</span></div><div style="display:flex;justify-content:space-between;align-items:center;"><a href="${pl.link}" target="_blank" onclick="event.stopPropagation();" style="font-size:12px;color:#ff0000;text-decoration:none;font-weight:800;display:inline-flex;align-items:center;gap:5px;"><i class="fa-brands fa-youtube" style="font-size:14px;"></i> YouTube'da Aç</a><div style="display:flex;align-items:center;gap:6px;" onclick="event.stopPropagation();"><span style="font-size:11px;font-weight:800;color:var(--color-text-muted);">Ana</span><label class="switch" style="margin:0;"><input type="checkbox" ${isMainChecked} onchange="window.toggleMainPlaylist('${pl.id}',this.checked)"><span class="slider"></span></label></div></div></div></div>`;
+                });
+                html+='</div></div>';grid.innerHTML+=html;
+            }
+        }
+
+        // --- SİLME MODU ---
+        let isDeleteMode=false,selectedPlaylists=new Set();
+        const toggleDeleteBtn=document.getElementById('toggleDeleteModeBtn');
+
+        function cancelDeleteMode(){isDeleteMode=false;selectedPlaylists.clear();toggleDeleteBtn.innerHTML='<i class="fa-solid fa-trash"></i> Kaldır';toggleDeleteBtn.classList.remove('active-mode');renderPlaylists();}
+
+        toggleDeleteBtn.addEventListener('click',()=>{
+            if(!isDeleteMode){isDeleteMode=true;toggleDeleteBtn.innerHTML='<i class="fa-solid fa-trash"></i> Sil (0)';toggleDeleteBtn.classList.add('active-mode');renderPlaylists();}
+            else{if(selectedPlaylists.size>0){document.getElementById('deleteConfirmMsg').innerText=`Seçilen ${selectedPlaylists.size} playlisti kalıcı olarak silmek istediğinize emin misiniz?`;document.getElementById('deleteConfirmModal').style.display='flex';}else cancelDeleteMode();}
+        });
+
+        document.getElementById('yesDeleteBtn').addEventListener('click',async()=>{
+            document.getElementById('deleteConfirmModal').style.display='none';
+            showToast('Siliniyor...');
+            try{for(let id of selectedPlaylists){await deleteDoc(doc(db,"users",currentUserUid,"userPlaylists",id.toString()));savedPlaylists=savedPlaylists.filter(p=>p.id.toString()!==id.toString());}cancelDeleteMode();}catch(e){showAlert('Silinirken hata oluştu.');}
+        });
+
+        window.handlePlaylistClick=function(plId){
+            if(isDeleteMode){const s=plId.toString();if(selectedPlaylists.has(s))selectedPlaylists.delete(s);else selectedPlaylists.add(s);toggleDeleteBtn.innerHTML=`<i class="fa-solid fa-trash"></i> Sil (${selectedPlaylists.size})`;renderPlaylists();}
+            else viewPlaylistDetails(plId);
+        };
+
+        // --- ANA PLAYLIST SWITCH ---
+        window.toggleMainPlaylist=async function(plId,isChecked){
+            const idx=savedPlaylists.findIndex(p=>p.id.toString()===plId.toString());
+            if(idx!==-1){savedPlaylists[idx].isMain=isChecked;renderPlaylists();if(currentUserUid){try{await setDoc(doc(db,"users",currentUserUid,"userPlaylists",plId.toString()),savedPlaylists[idx]);}catch(e){}}}
+        };
+
+        // --- DETAY PENCERESİ ---
+        let currentViewingId=null,originalProgressState=[];
+        function hasProgressChanged(){const cbs=document.querySelectorAll('.video-watched-cb');if(cbs.length!==originalProgressState.length)return true;for(let i=0;i<cbs.length;i++){if(cbs[i].checked!==originalProgressState[i])return true;}return false;}
+
+        function viewPlaylistDetails(plId){
+            const pl=savedPlaylists.find(p=>p.id.toString()===plId.toString());if(!pl)return;
+            currentViewingId=plId;
+            document.getElementById('vp-title').innerText=pl.customTitle||pl.subject;
+            let wSec=0,tSec=0;const tbody=document.getElementById('vp-tbody');tbody.innerHTML='';originalProgressState=[];
+            if(pl.videos&&pl.videos.length>0){
+                pl.videos.forEach((v,i)=>{
+                    originalProgressState.push(!!v.isWatched);const s=timeStringToSeconds(v.duration);tSec+=s;if(v.isWatched)wSec+=s;
+                    const checked=v.isWatched?'checked':'',op=v.isWatched?'0.5':'1',td=v.isWatched?'line-through':'none';
+                    const planned=v.isPlanned?'<span style="color:#17a2b8;font-size:10px;font-weight:bold;background:#e0f7fa;padding:2px 6px;border-radius:4px;margin-left:8px;display:inline-block;"><i class="fa-solid fa-calendar-plus"></i> Plana Eklendi</span>':'';
+                    tbody.innerHTML+=`<tr style="opacity:${op};transition:var(--transition-base);"><td style="font-weight:800;color:var(--color-primary);text-align:center;">${i+1}</td><td><img src="${v.thumb}" style="width:70px;border-radius:var(--radius-sm);box-shadow:0 2px 4px rgba(0,0,0,0.1);"></td><td style="line-height:1.4;color:var(--color-text-main);font-weight:600;"><span class="vid-title" style="text-decoration:${td};">${v.title}</span>${planned}</td><td style="color:var(--color-text-muted);font-weight:800;"><i class="fa-solid fa-clock"></i> ${v.duration}</td><td style="text-align:center;"><input type="checkbox" class="video-watched-cb" data-index="${i}" ${checked} onchange="this.closest('tr').style.opacity=this.checked?'0.5':'1';this.closest('tr').querySelector('.vid-title').style.textDecoration=this.checked?'line-through':'none';" style="width:18px;height:18px;cursor:pointer;accent-color:var(--color-success);"></td></tr>`;
+                });
+                let pct=tSec>0?Math.round(wSec/tSec*100):0;
+                const wCount=pl.videos.filter(v=>v.isWatched).length;
+                document.getElementById('vp-count').innerHTML=`<i class="fa-solid fa-video"></i> ${wCount} / ${pl.videoCount} İzlendi`;
+                document.getElementById('vp-duration').innerHTML=`<i class="fa-solid fa-stopwatch"></i> ${pl.totalDuration||'Bilinmiyor'}`;
+                document.getElementById('vp-progress').innerHTML=`<i class="fa-solid fa-percent"></i> %${pct} Tamamlandı`;
+            }else{tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;font-weight:bold;">Bu playlist eski sürüm, detay görüntülenemiyor.</td></tr>';document.getElementById('vp-count').innerHTML=`<i class="fa-solid fa-video"></i> 0 / ${pl.videoCount} İzlendi`;document.getElementById('vp-duration').innerHTML=`<i class="fa-solid fa-stopwatch"></i> ${pl.totalDuration||'Bilinmiyor'}`;document.getElementById('vp-progress').innerHTML=`<i class="fa-solid fa-percent"></i> %0 Tamamlandı`;}
+            document.getElementById('viewPlaylistModal').style.display='flex';
+        }
+
+        function attemptCloseView(){if(hasProgressChanged())document.getElementById('cancelConfirmModal').style.display='flex';else document.getElementById('viewPlaylistModal').style.display='none';}
+        document.getElementById('closeViewModal').onclick=attemptCloseView;
+        document.getElementById('cancelViewBtn').onclick=attemptCloseView;
+        document.getElementById('yesCancelBtn').onclick=()=>{document.getElementById('cancelConfirmModal').style.display='none';document.getElementById('viewPlaylistModal').style.display='none';};
+        document.getElementById('saveProgressBtn').onclick=()=>{if(!hasProgressChanged()){document.getElementById('viewPlaylistModal').style.display='none';return;}document.getElementById('saveConfirmModal').style.display='flex';};
+
+        document.getElementById('yesSaveBtn').onclick=async()=>{
+            document.getElementById('saveConfirmModal').style.display='none';if(!currentViewingId||!currentUserUid)return;
+            const idx=savedPlaylists.findIndex(p=>p.id.toString()===currentViewingId.toString());if(idx===-1)return;
+            const pl=savedPlaylists[idx];const cbs=document.querySelectorAll('.video-watched-cb');
+            cbs.forEach(cb=>{const i=parseInt(cb.getAttribute('data-index'));if(pl.videos&&pl.videos[i])pl.videos[i].isWatched=cb.checked;});
+            showToast('İlerleme Kaydediliyor...');
+            try{await setDoc(doc(db,"users",currentUserUid,"userPlaylists",pl.id.toString()),pl);viewPlaylistDetails(currentViewingId);renderPlaylists();}catch(e){showAlert('İlerleme kaydedilemedi.');}
+        };
+
+        // --- RENAME ---
+        document.getElementById('editTitleIcon').addEventListener('click',()=>{if(!currentViewingId)return;const pl=savedPlaylists.find(p=>p.id.toString()===currentViewingId.toString());if(pl){document.getElementById('newNameInput').value=pl.customTitle||pl.subject;document.getElementById('renameModal').style.display='flex';setTimeout(()=>document.getElementById('newNameInput').focus(),100);}});
+        document.getElementById('closeRenameModal').onclick=()=>document.getElementById('renameModal').style.display='none';
+        document.getElementById('cancelRenameBtn').onclick=()=>document.getElementById('renameModal').style.display='none';
+        document.getElementById('saveRenameBtn').addEventListener('click',async()=>{
+            const newTitle=document.getElementById('newNameInput').value.trim();if(!newTitle){document.getElementById('newNameInput').style.borderColor='#d9534f';setTimeout(()=>document.getElementById('newNameInput').style.borderColor='#dce4ec',2000);return;}
+            if(!currentViewingId||!currentUserUid)return;const idx=savedPlaylists.findIndex(p=>p.id.toString()===currentViewingId.toString());if(idx===-1)return;
+            const btn=document.getElementById('saveRenameBtn');const orig=btn.innerText;btn.innerText='Kaydediliyor...';btn.disabled=true;
+            try{savedPlaylists[idx].customTitle=newTitle;await setDoc(doc(db,"users",currentUserUid,"userPlaylists",savedPlaylists[idx].id.toString()),savedPlaylists[idx],{merge:true});document.getElementById('vp-title').innerText=newTitle;renderPlaylists();document.getElementById('renameModal').style.display='none';}catch(e){showAlert('Başlık güncellenirken hata oluştu.');}finally{btn.innerText=orig;btn.disabled=false;}
+        });
+
+        // --- YOUTUBE PLAYLIST ÇEKME VE KAYDETME ---
+        const addModal=document.getElementById('addPlaylistModal');
+        document.getElementById('addNewPlaylistBtn').addEventListener('click',()=>{
+            document.getElementById('playlistLinkInput').value='';
+            document.getElementById('playlistTitleInput').value='';
+            document.getElementById('ytVideoCountBadge').innerText='0 Video';
+            document.getElementById('ytDurationBadge').style.display='none';
+            document.getElementById('isMainPlaylistSwitch').checked=false; // Her açılışta switch'i sıfırla
+            document.getElementById('youtubeTabloGovdesi').innerHTML='<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; background:#fff; border-radius:12px; border:2px dashed #eef2f5; width:100%; box-sizing:border-box;"><i class="fa-brands fa-youtube" style="font-size:35px; margin-bottom:12px; display:block; color:#ff0000; opacity:0.8;"></i><p style="font-size:13px; font-weight:600; color:var(--color-text-muted); margin:0; text-align:center; padding:0 20px;">Link girip "Videoları Bul" butonuna basınız.</p></div>';
+            document.getElementById('confirmSaveBtn').style.display='none';
+            addModal.style.display='flex';
+        });
+        document.getElementById('closeAddModal').onclick=()=>addModal.style.display='none';
+        document.getElementById('cancelAddBtn').onclick=()=>addModal.style.display='none';
+
+        let tempPlaylistData=null;
+        document.getElementById('fetchPlaylistBtn').addEventListener('click',async()=>{
+            const link=document.getElementById('playlistLinkInput').value.trim();const plId=extractPlaylistId(link);const tbody=document.getElementById('youtubeTabloGovdesi');const btn=document.getElementById('fetchPlaylistBtn');const saveBtn=document.getElementById('confirmSaveBtn');
+            const ytBadge=document.getElementById('ytVideoCountBadge'); const ytDurBadge=document.getElementById('ytDurationBadge');
+            if(!plId){showAlert('Lütfen geçerli bir YouTube Playlist linki giriniz.');return;}
+            const origHtml=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Aranıyor...';btn.disabled=true;saveBtn.style.display='none';ytDurBadge.style.display='none';
+            tbody.innerHTML='<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--color-primary); width:100%;"><i class="fa-solid fa-spinner fa-spin" style="font-size:30px; margin-bottom:15px;"></i><br><span style="font-weight:700; font-size:13px;">Videolar Çekiliyor...</span></div>';
+            let allItems=[],nextPage='';
+            try{
+                do{const r=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${plId}&key=${YT_API_KEY}&pageToken=${nextPage}`);const d=await r.json();if(d.items)allItems=allItems.concat(d.items);nextPage=d.nextPageToken||'';}while(nextPage);
+                let allVids=[];for(let i=0;i<allItems.length;i+=50){const ids=allItems.slice(i,i+50).map(x=>x.snippet.resourceId.videoId).join(',');const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${YT_API_KEY}`);const d=await r.json();if(d.items)allVids=allVids.concat(d.items);}
+                tbody.innerHTML='';let count=0,totalSec=0,vids=[];
+                allItems.forEach((item)=>{
+                    const title=item.snippet.title;const vid=item.snippet.resourceId.videoId;const thumbs=item.snippet.thumbnails;const thumb=thumbs?.high?.url||thumbs?.medium?.url||thumbs?.default?.url||'';
+                    if(title==='Private video'||title==='Deleted video')return;
+                    const det=allVids.find(v=>v.id===vid);const raw=det?det.contentDetails.duration:'PT0S';const dur=parseDuration(raw);totalSec+=parseDurationToSeconds(raw);vids.push({title,thumb,duration:dur,videoId:vid});count++;
+                    
+                    const itemDiv=document.createElement('div');
+                    itemDiv.style.cssText='width:100%; box-sizing:border-box; display:flex; align-items:center; gap:10px; background:#fff; padding:6px 10px; border-radius:8px; border:1px solid #eef2f5; box-shadow:0 2px 4px rgba(0,0,0,0.02); transition:transform 0.2s, border-color 0.2s;';
+                    itemDiv.onmouseover=()=>itemDiv.style.borderColor='var(--color-primary-border)';
+                    itemDiv.onmouseout=()=>itemDiv.style.borderColor='#eef2f5';
+                    itemDiv.innerHTML=`<div style="position:relative; flex-shrink:0;"><span style="position:absolute; top:-4px; left:-4px; background:var(--color-primary); color:white; width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:9px; font-weight:900; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;">${count}</span><img src="${thumb}" style="width:72px; height:40px; object-fit:cover; border-radius:4px;"></div><div style="flex:1; min-width:0;"><div style="font-size:12px; font-weight:700; color:var(--color-text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px;">${title}</div><div style="font-size:10px; font-weight:800; color:var(--color-text-muted);"><i class="fa-solid fa-clock" style="color:#bbb;"></i> ${dur}</div></div>`;
+                    tbody.appendChild(itemDiv);
+                });
+                ytBadge.innerText = count + ' Video';
+                if(count>0){
+                    saveBtn.style.display='block';
+                    ytDurBadge.innerHTML = `<i class="fa-solid fa-stopwatch"></i> ${formatSecondsToText(totalSec)}`;
+                    ytDurBadge.style.display='inline-block';
+                    tempPlaylistData={id:Date.now(),link,videoCount:count,totalDuration:formatSecondsToText(totalSec),firstVideoThumb:allItems[0].snippet.thumbnails?.medium?.url||'',videos:vids};
+                }
+                else { tbody.innerHTML='<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--color-danger); font-weight:bold; width:100%; box-sizing:border-box;"><i class="fa-solid fa-triangle-exclamation" style="font-size:30px; margin-bottom:10px;"></i><br>Bu listede video bulunamadı.</div>'; ytBadge.innerText='0 Video'; ytDurBadge.style.display='none'; }
+            }catch(e){tbody.innerHTML='<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--color-danger); font-weight:bold; width:100%; box-sizing:border-box;"><i class="fa-solid fa-triangle-exclamation" style="font-size:30px; margin-bottom:10px;"></i><br>Hata oluştu. API veya linki kontrol edin.</div>'; ytBadge.innerText='Hata'; ytDurBadge.style.display='none';}finally{btn.innerHTML=origHtml;btn.disabled=false;}
+        });
+
+        document.getElementById('confirmSaveBtn').addEventListener('click',async()=>{
+            if(!tempPlaylistData)return;if(!currentUserUid){showAlert('Playlist kaydetmek için giriş yapmalısınız.');return;}
+            const titleInput=document.getElementById('playlistTitleInput');const title=titleInput.value.trim();
+            if(!title){titleInput.style.borderColor='#d9534f';setTimeout(()=>titleInput.style.borderColor='#dce4ec',2000);showAlert('Lütfen playliste isim veriniz.');return;}
+            tempPlaylistData.customTitle=title;const btn=document.getElementById('confirmSaveBtn');const orig=btn.innerText;btn.innerText='Kaydediliyor...';btn.disabled=true;
+            try{
+                tempPlaylistData.examType=document.getElementById('playlistExamType').value;
+                tempPlaylistData.track=tempPlaylistData.examType==='ayt'?document.getElementById('playlistTrack').value:null;
+                const subj=document.getElementById('playlistSubject').value;const sl=document.getElementById('playlistSubLesson');const slVal=sl&&sl.value?sl.value:'';
+                tempPlaylistData.subject=(slVal&&slVal!=='Genel')?slVal:subj;tempPlaylistData.parentSubject=subj;tempPlaylistData.subLesson=slVal||null;
+                
+                // ANA PLAYLIST KONTROLÜ BURADA VERİYE EKLENİYOR
+                tempPlaylistData.isMain = document.getElementById('isMainPlaylistSwitch').checked;
+                
+                await setDoc(doc(db,"users",currentUserUid,"userPlaylists",tempPlaylistData.id.toString()),tempPlaylistData);
+                savedPlaylists.push(tempPlaylistData);renderPlaylists();addModal.style.display='none';tempPlaylistData=null;titleInput.value='';
+            }catch(e){showAlert('Playlist kaydedilemedi.');}finally{btn.innerText=orig;btn.disabled=false;}
+        });
+
+        // --- FIREBASE AUTH ---
+        onAuthStateChanged(auth,async(user)=>{
+            const authContainer=document.getElementById('headerAuthContainer');
+            if(user){
+                currentUserUid=user.uid;let displayName=user.displayName||'Profil';
+                try{
+                    const ud=await getDoc(doc(db,"users",user.uid));
+                    if(ud.exists()){
+                        const data = ud.data();
+                        if(data.username) displayName=data.username;
+                        if(data.isAdmin === true){
+                            if(document.getElementById('sideMenuAdminBtn')) document.getElementById('sideMenuAdminBtn').style.display='';
+                        }
+                    }
+                }catch(e){}
+                authContainer.innerHTML=`<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ${displayName}</span>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='none';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='none';
+                try{const snap=await getDocs(collection(db,"users",user.uid,"userPlaylists"));savedPlaylists=[];snap.forEach(d=>savedPlaylists.push(d.data()));renderPlaylists();}catch(e){console.error('Playlist yükleme hatası:',e);}
+            }else{
+                currentUserUid=null;savedPlaylists=[];
+                authContainer.innerHTML=`<button class="btn-outline" onclick="window.location.href='index.html?action=login'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href='index.html?action=register'">Kaydol</button>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='';
+                document.getElementById('playlistsGrid').innerHTML='<div class="pl-placeholder"><i class="fa-solid fa-right-to-bracket"></i>Playlistlerini görmek için giriş yapmalısın.</div>';
+            }
+            setTimeout(()=>document.getElementById('mainPageLoader').classList.add('hidden'),300);
+        });
+    </script>
+</body>
+</html>

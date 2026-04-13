@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Planlayıcı | Deneme Analiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root{--color-primary:#007bff;--color-primary-hover:#0056b3;--color-primary-light:#e6f2ff;--color-primary-lighter:#f0f8ff;--color-primary-border:#cce5ff;--color-primary-shadow:rgba(0,123,255,0.2);--color-primary-shadow-md:rgba(0,123,255,0.3);--color-success:#28a745;--color-success-hover:#218838;--color-success-light:#d4edda;--color-success-border:#c3e6cb;--color-danger:#d9534f;--color-danger-hover:#c9302c;--color-danger-light:#ffeaea;--color-danger-border:#ffc2c2;--color-warning:#ffc107;--color-bg-page:#f4f7f6;--color-bg-card:#ffffff;--color-bg-input:#f8f9fa;--color-bg-hover:#e6f2ff;--color-text-main:#333;--color-text-secondary:#555;--color-text-muted:#888;--color-text-light:#aaa;--color-text-placeholder:#95a5a6;--color-border:#eef2f5;--color-border-medium:#dce4ec;--color-border-strong:#bdc3c7;--shadow-xs:0 2px 4px rgba(0,0,0,0.04);--shadow-sm:0 2px 4px rgba(0,0,0,0.1);--shadow-md:0 4px 10px rgba(0,0,0,0.1);--shadow-card:0 8px 20px rgba(0,0,0,0.06);--shadow-modal:0 10px 30px rgba(0,0,0,0.2);--shadow-primary:0 4px 10px var(--color-primary-shadow);--radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:20px;--radius-full:50%;--transition-fast:all 0.2s ease;--transition-base:all 0.3s ease;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+        body{background-color:var(--color-bg-page);color:var(--color-text-main);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+        /* HEADER */
+        .header{display:flex;justify-content:space-between;align-items:center;background-color:var(--color-bg-card);padding:14px 25px;box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06);margin:20px auto 15px auto;width:calc(100% - 40px);max-width:1400px;border-radius:var(--radius-lg);position:sticky;top:20px;z-index:100;flex-shrink:0;}
+
+        /* ANA İÇERİK */
+        .template-content{width:calc(100% - 40px);max-width:1400px;margin:10px auto 20px auto;flex:1;min-height:0;background-color:var(--color-bg-card);border-radius:var(--radius-xl);box-shadow:0 15px 40px rgba(0,0,0,0.18), 0 5px 15px rgba(0,0,0,0.08);display:flex;flex-direction:column;overflow:hidden;}
+        .logo-container{display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform 0.2s;}
+        .logo-container:hover{transform:scale(1.02);}
+        .logo-icon{width:28px;height:28px;background-color:var(--color-primary);color:white;border-radius:var(--radius-full);display:flex;justify-content:center;align-items:center;font-size:13px;box-shadow:var(--shadow-primary);}
+        .logo-text{font-size:16px;font-weight:700;color:var(--color-text-main);letter-spacing:0.5px;}
+        .header-center-title{position:absolute;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:var(--color-text-main);display:flex;align-items:center;gap:8px;}
+        .btn-outline{background-color:transparent;color:var(--color-primary);border:2px solid var(--color-primary);padding:8px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition-base);}
+        .btn-outline:hover{background-color:var(--color-primary);color:#fff;}
+        .btn-primary{background-color:var(--color-primary);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition-base);box-shadow:var(--shadow-primary);}
+        .btn-primary:hover{background-color:var(--color-primary-hover);transform:translateY(-2px);}
+        .menu-btn{display:flex;align-items:center;gap:10px;font-size:24px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;transition:color 0.2s,transform 0.2s;padding:5px 10px;}
+        .menu-text{font-size:16px;font-weight:700;}.menu-btn:hover{color:var(--color-primary);transform:scale(1.05);}
+
+        /* REKLAMLAR */
+        .ad-space-left,.ad-space-right{position:fixed;top:50%;transform:translateY(-50%);width:10vw;height:600px;max-height:80vh;background-color:#f8f9fa;border:2px dashed #ced4da;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:50;color:#adb5bd;font-weight:800;font-size:16px;text-align:center;}
+        .ad-space-left{left:20px;}.ad-space-right{right:20px;}
+        @media(max-width:900px){.ad-space-left,.ad-space-right{display:none!important;}}
+
+        /* LOADER */
+        .page-loader{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#f4f7f6,#e6f2ff);z-index:9999;display:flex;justify-content:center;align-items:center;transition:opacity 0.5s,visibility 0.5s;}
+        .page-loader.hidden{opacity:0;visibility:hidden;}
+        .loader-content{display:flex;flex-direction:column;align-items:center;gap:15px;animation:floatLoader 2s infinite ease-in-out;}
+        .loader-logo{width:70px;height:70px;font-size:30px;box-shadow:0 8px 25px rgba(0,123,255,0.3);}
+        .loader-title{font-size:26px;font-weight:800;color:var(--color-text-main);letter-spacing:1px;margin-top:5px;}
+        .loader-text{font-size:13px;font-weight:600;color:#777;margin-top:5px;}
+        .spinner{width:40px;height:40px;border:4px solid #cce5ff;border-top:4px solid var(--color-primary);border-radius:var(--radius-full);animation:spin 1s linear infinite;margin-top:5px;}
+        @keyframes spin{100%{transform:rotate(360deg);}}
+        @keyframes floatLoader{0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);}}
+
+        /* YAN MENÜ */
+        .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.4);backdrop-filter:blur(3px);z-index:4000;opacity:0;visibility:hidden;transition:var(--transition-base);}
+        .menu-overlay.show{opacity:1;visibility:visible;}
+        .side-menu{position:fixed;top:0;right:-320px;width:300px;height:100vh;background-color:var(--color-bg-card);box-shadow:-5px 0 25px rgba(0,0,0,0.1);z-index:4001;transition:right 0.3s cubic-bezier(0.25,0.8,0.25,1);display:flex;flex-direction:column;}
+        .side-menu.open{right:0;}
+        .side-menu-header{display:flex;justify-content:space-between;align-items:center;padding:20px 25px;border-bottom:1px solid #eef2f5;background-color:#f8fbff;}
+        .side-menu-header h2{font-size:18px;font-weight:800;color:var(--color-primary);display:flex;align-items:center;gap:10px;}
+        .close-menu-btn{background:none;border:none;font-size:28px;color:var(--color-text-light);cursor:pointer;transition:transform 0.2s,color 0.2s;line-height:1;}
+        .close-menu-btn:hover{color:var(--color-danger);transform:scale(1.1);}
+        .side-menu-content{padding:20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+        .menu-item{display:flex;align-items:center;gap:15px;padding:12px 15px;color:var(--color-text-secondary);text-decoration:none;font-size:14px;font-weight:700;border-radius:10px;transition:var(--transition-fast);background-color:#fcfcfc;border:1px solid transparent;}
+        .menu-item:hover{background-color:var(--color-primary-lighter);color:var(--color-primary);border-color:var(--color-primary-border);transform:translateX(5px);}
+        .menu-item i{font-size:16px;color:var(--color-primary);width:20px;text-align:center;}
+        .menu-item.active-page{background-color:var(--color-primary-lighter);color:var(--color-primary);border-color:var(--color-primary-border);}
+
+        /* MODAL STİLLERİ (ders.html ile uyumlu) */
+        .custom-modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.4);backdrop-filter:blur(4px);justify-content:center;align-items:center;animation:fadeIn 0.2s ease;}
+        @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+        .custom-modal-content{background-color:#fff;width:95%;max-width:650px;border-radius:var(--radius-xl);box-shadow:0 15px 30px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.3s ease;}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+        .modal-header{padding:15px 25px;background-color:var(--color-bg-input);border-bottom:1px solid #eef2f5;display:flex;justify-content:space-between;align-items:center;}
+        .modal-header h3{font-size:16px;font-weight:800;color:var(--color-text-main);}
+        .close-modal-btn{font-size:24px;color:var(--color-text-light);cursor:pointer;transition:color 0.2s;line-height:1;background:none;border:none;}
+        .close-modal-btn:hover{color:var(--color-danger);}
+        .modal-body{padding:25px;display:flex;flex-direction:column;gap:18px;}
+        .modal-footer{padding:15px 25px;background-color:var(--color-bg-input);border-top:1px solid #eef2f5;display:flex;justify-content:flex-end;gap:12px;}
+        .modal-centered{max-width:380px!important;text-align:center;padding:30px;}
+        .modal-icon-primary{font-size:40px;color:var(--color-primary);margin-bottom:15px;display:block;}
+        .modal-icon-danger{font-size:40px;color:var(--color-danger);margin-bottom:15px;display:block;}
+        .modal-title{margin-bottom:10px;font-size:18px;color:var(--color-text-main);}
+        .modal-desc{color:var(--color-text-muted);font-size:14px;margin-bottom:25px;line-height:1.5;}
+        .modal-actions{display:flex;gap:12px;justify-content:center;}
+        .modal-input{width:100%;padding:12px 15px;border:1px solid var(--color-border-medium);border-radius:10px;font-size:13px;font-family:inherit;color:var(--color-text-main);background-color:#fcfcfc;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+        .modal-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,123,255,0.1);background-color:#fff;}
+        .input-group{display:flex;flex-direction:column;gap:6px;}
+        .input-group label{font-size:13px;font-weight:700;color:var(--color-text-secondary);margin-left:4px;}
+        .required-star{color:var(--color-danger);}
+        .error-msg{color:var(--color-danger);font-size:12px;font-weight:700;display:none;text-align:center;}
+        .save-note-btn{background-color:var(--color-primary);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;transition:var(--transition-fast);}
+        .save-note-btn:hover{background-color:var(--color-primary-hover);transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,123,255,0.3);}
+        .cancel-note-btn{background-color:#fff;color:var(--color-text-secondary);border:1px solid #ccc;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;transition:var(--transition-fast);}
+        .cancel-note-btn:hover{background-color:#f0f0f0;color:var(--color-text-main);}
+        .bg-danger{background-color:var(--color-danger)!important;}
+        .bg-success{background-color:var(--color-success)!important;}
+
+        /* DENEME TAB BUTONLARI */
+        .exam-tabs{display:flex;gap:30px;}
+        .exam-tab-btn{background:none;border:none;font-size:18px;font-weight:800;color:var(--color-text-light);cursor:pointer;padding-bottom:8px;border-bottom:3px solid transparent;transition:var(--transition-base);}
+        .exam-tab-btn:hover{color:var(--color-text-secondary);}
+        .exam-tab-btn.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+
+        /* DERS SATIRI (DYB) */
+        .subject-input-row{display:flex;align-items:center;justify-content:space-between;background:var(--color-bg-input);padding:12px 18px;border-radius:var(--radius-lg);border:1px solid var(--color-border);margin-bottom:10px;transition:transform 0.2s,box-shadow 0.2s;}
+        .subject-input-row:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.03);border-color:var(--color-primary-border);}
+        .subject-name{font-size:13px;font-weight:800;color:var(--color-text-secondary);flex:1;}
+        .dyb-inputs{display:flex;gap:12px;}
+        .dyb-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
+        .dyb-box label{font-size:10px;font-weight:800;color:var(--color-text-muted);}
+        .dyb-input{width:45px;padding:6px 4px;border:1px solid var(--color-border-medium);border-radius:var(--radius-sm);text-align:center;font-size:13px;font-weight:700;color:var(--color-text-main);transition:var(--transition-fast);outline:none;}
+        .dyb-box:nth-child(1) label{color:var(--color-success);}.dyb-box:nth-child(1) .dyb-input:focus{border-color:var(--color-success);box-shadow:0 0 0 2px rgba(40,167,69,0.1);}
+        .dyb-box:nth-child(2) label{color:var(--color-danger);}.dyb-box:nth-child(2) .dyb-input:focus{border-color:var(--color-danger);box-shadow:0 0 0 2px rgba(217,83,79,0.1);}
+        .dyb-box:nth-child(3) label{color:#6c757d;}.dyb-box:nth-child(3) .dyb-input:focus{border-color:#6c757d;box-shadow:0 0 0 2px rgba(108,117,125,0.1);}
+        .dyb-input::-webkit-outer-spin-button,.dyb-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+        .dyb-input[type=number]{-moz-appearance:textfield;}
+        .subject-inputs-container{max-height:260px;overflow-y:auto;padding-right:8px;}
+        .subject-inputs-container::-webkit-scrollbar{width:5px;}
+        .subject-inputs-container::-webkit-scrollbar-thumb{background-color:var(--color-primary-border);border-radius:5px;}
+
+        /* CUSTOM SELECT (TCS) */
+        .task-custom-select{position:relative;width:100%;user-select:none;}
+        .tcs-trigger{display:flex;justify-content:space-between;align-items:center;background-color:#fcfcfc;border:1px solid var(--color-border-medium);padding:12px 15px;border-radius:10px;font-size:13px;font-weight:700;color:var(--color-text-main);cursor:pointer;transition:var(--transition-fast);}
+        .tcs-trigger:hover{border-color:var(--color-primary);}
+        .task-custom-select.open .tcs-trigger{border-color:var(--color-primary);border-bottom-left-radius:0;border-bottom-right-radius:0;box-shadow:0 4px 10px rgba(0,123,255,0.1);}
+        .task-custom-select.open .tcs-trigger i{transform:rotate(180deg);}
+        .task-custom-select.tcs-up.open .tcs-trigger{border-radius:8px; border-top-left-radius:0; border-top-right-radius:0; box-shadow:0 -4px 10px rgba(0,123,255,0.1);}
+        .tcs-options{position:absolute;top:100%;left:0;right:0;background-color:#fff;border:1px solid var(--color-primary);border-top:none;border-bottom-left-radius:10px;border-bottom-right-radius:10px;box-shadow:0 8px 15px rgba(0,0,0,0.1);z-index:999;display:none;max-height:200px;overflow-y:auto;}
+        .task-custom-select.open .tcs-options{display:block;}
+        .tcs-option{padding:10px 15px;font-size:13px;font-weight:600;color:var(--color-text-secondary);cursor:pointer;transition:background 0.2s;border-bottom:1px solid #f1f1f1;}
+        .tcs-option:last-child{border-bottom:none;}
+        .tcs-option:hover{background-color:var(--color-primary-lighter);color:var(--color-primary);}
+        .tcs-option.selected{background-color:var(--color-bg-hover);color:var(--color-primary);font-weight:800;}
+
+        /* CUSTOM NUMBER INPUT */
+        .custom-number-input{position:relative;display:flex;align-items:center;}
+        .custom-number-input .modal-input{padding-right:120px;}
+        .cni-controls{position:absolute;right:6px;display:flex;gap:4px;}
+        .cni-btn{background-color:var(--color-primary-lighter);border:1px solid var(--color-primary-border);color:var(--color-primary);width:28px;height:28px;border-radius:var(--radius-md);display:flex;justify-content:center;align-items:center;cursor:pointer;transition:var(--transition-fast);}
+        .cni-btn:hover{background-color:var(--color-primary);color:#fff;box-shadow:0 2px 6px rgba(0,123,255,0.2);}
+        .no-spinner::-webkit-outer-spin-button,.no-spinner::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+        .no-spinner[type=number]{-moz-appearance:textfield;}
+
+        /* TRACK SWITCH (SAY/EA/SOZ/DIL) */
+        .track-switch-container { display: flex; background-color: var(--color-bg-input); border-radius: 10px; padding: 4px; border: 1px solid var(--color-border); }
+        .track-btn { flex: 1; border: none; background: transparent; padding: 8px 0; font-size: 13px; font-weight: 800; color: var(--color-text-muted); border-radius: 8px; cursor: pointer; transition: var(--transition-fast); }
+        .track-btn.active { background-color: var(--color-primary); color: #fff; box-shadow: 0 2px 8px rgba(0,123,255,0.3); }
+        
+        /* SWITCH */
+        .switch{position:relative;display:inline-block;width:36px;height:20px;margin-top:4px;}
+        .switch input{opacity:0;width:0;height:0;}
+        .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#dce4ec;transition:.4s;border-radius:34px;}
+        .slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background-color:white;transition:.4s;border-radius:var(--radius-full);box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+        input:checked+.slider{background-color:var(--color-warning);}
+        input:checked+.slider:before{transform:translateX(16px);}
+
+        /* TOAST */
+        .action-toast{position:fixed;top:-100px;left:50%;transform:translateX(-50%);background-color:var(--color-bg-card);padding:12px 25px;border-radius:50px;box-shadow:0 10px 30px rgba(0,0,0,0.15);z-index:9999;transition:all 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;border:1px solid var(--color-border);}
+        .action-toast.show{top:30px;}
+        .toast-content{display:flex;align-items:center;gap:12px;}
+        .toast-spinner{width:18px;height:18px;border:3px solid #f3f3f3;border-top:3px solid var(--color-primary);border-radius:var(--radius-full);animation:spin 1s linear infinite;}
+        #toastText{font-size:14px;font-weight:700;color:var(--color-text-main);}
+
+        /* İÇERİK DÜZEN */
+        .da-inner{flex:1;min-height:0;display:flex;flex-direction:row;overflow:hidden;}
+        /* Sol panel */
+        .da-sidebar{width:320px;background:var(--color-bg-card);border-right:1px solid #eef2f5;display:flex;flex-direction:column;flex-shrink:0;position:relative;}
+        .da-sidebar-header{padding:20px;border-bottom:1px solid #eef2f5;}
+        .da-sidebar-header h3{font-size:22px;margin:0;color:var(--color-text-main);margin-bottom:12px;}
+        .da-tabs{display:flex;align-items:center;gap:15px;flex-wrap:wrap;}
+        .da-exam-count{color:var(--color-text-muted);font-size:12px;background:var(--color-primary-lighter);padding:2px 8px;border-radius:var(--radius-sm);}
+        .da-list{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;padding-bottom:80px;}
+        .da-list::-webkit-scrollbar{width:4px;}.da-list::-webkit-scrollbar-thumb{background:var(--color-primary-border);border-radius:4px;}
+        .da-bottom-bar{position:absolute;bottom:0;left:0;width:100%;background:var(--color-bg-card);border-top:1px solid #eef2f5;padding:12px 15px;display:flex;flex-direction:column;gap:10px;z-index:10;box-shadow:0 -4px 10px rgba(0,0,0,0.02);}
+        /* Sağ panel */
+        .da-charts{flex:1;overflow-y:auto;padding:25px;display:flex;flex-direction:column;gap:20px;background:var(--color-bg-page);}
+        .da-charts::-webkit-scrollbar{width:6px;}.da-charts::-webkit-scrollbar-thumb{background:var(--color-primary-border);border-radius:6px;}
+        .da-chart-box{background:var(--color-bg-card);border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,0.03);border:1px solid #eef2f5;}
+
+        /* DENEME KART */
+        .da-exam-card{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:10px 14px;border-radius:var(--radius-md);border:1px solid #e1e9f0;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;flex-shrink:0;}
+        .da-exam-card:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,123,255,0.05);border-color:var(--color-primary-border);}
+        .da-exam-card.targeted{border:2px solid var(--color-danger)!important;background-color:#fff0f0;}
+        .da-exam-card-left{display:flex;flex-direction:row;align-items:center;gap:8px;overflow:hidden;flex:1;padding-right:10px;}
+        .da-exam-title{font-size:12px;font-weight:700;color:var(--color-text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .da-exam-date{font-size:10px;font-weight:600;color:var(--color-text-muted);white-space:nowrap;flex-shrink:0;}
+        .da-exam-net{font-size:12px;font-weight:900;color:#17a2b8;background:#e0f7fa;padding:3px 6px;border-radius:var(--radius-sm);flex-shrink:0;}
+        .placeholder-text{color:var(--color-text-light);font-size:13px;font-weight:600;border:2px dashed #f0f0f0;padding:20px;border-radius:var(--radius-lg);text-align:center;width:100%;}
+    </style>
+</head>
+<body>
+    <div id="mainPageLoader" class="page-loader"><div class="loader-content"><div class="logo-icon loader-logo"><i class="fa-solid fa-chart-pie"></i></div><h2 class="loader-title">Deneme Analiz Merkezi</h2><div class="spinner"></div><p class="loader-text">Deneme verileri yükleniyor...</p></div></div>
+    <div class="ad-space-left"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+    <div class="ad-space-right"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='ders.html'"><div class="logo-icon"><i class="fa-solid fa-book-open"></i></div><h1 class="logo-text">Ders Planlayıcı</h1></div>
+        <div class="header-center-title"><i class="fa-solid fa-chart-pie" style="color:var(--color-primary);"></i> Deneme Analiz Merkezi</div>
+        <div style="display:flex;align-items:center;gap:15px;">
+            <div id="headerAuthContainer" style="display:flex;align-items:center;gap:10px;"></div>
+            <button class="menu-btn" title="Menü" id="openMenuBtn"><span class="menu-text">Menü</span><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK: DENEME ANALİZ MERKEZİ -->
+    <div class="template-content">
+        <div class="da-inner">
+            <!-- SOL PANEL: DENEME LİSTESİ -->
+            <div class="da-sidebar">
+                <div class="da-sidebar-header" style="padding: 15px 20px 0 20px;">
+                    <div class="da-tabs" style="display:flex; width:100%; gap:0;">
+                        <button class="exam-tab-btn active" id="expandedTabTyt" style="flex:1; font-size:15px; text-align:center; padding-bottom:12px;">TYT</button>
+                        <button class="exam-tab-btn" id="expandedTabAyt" style="flex:1; font-size:15px; text-align:center; padding-bottom:12px;">AYT</button>
+                    </div>
+                </div>
+                <div style="padding:10px 20px;border-bottom:1px solid #eef2f5;font-weight:800;color:var(--color-primary);font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span>Kayıtlı Denemeler</span>
+                        <span class="da-exam-count" id="expandedExamCount">0</span>
+                    </div>
+                    <button class="save-note-btn" id="expandedAddNewExamBtn" style="display:flex;align-items:center;gap:5px;font-size:12px;padding:6px 12px;background-color:var(--color-primary);border-radius:var(--radius-md);">
+                        <i class="fa-solid fa-plus"></i> Ekle
+                    </button>
+                </div>
+                <div class="da-list" id="expandedExamsList" style="padding-bottom: 125px;"></div>
+
+                <div class="da-bottom-bar">
+                    <div id="expandedAytTrackSelector" style="display:none; width:100%; margin-bottom:10px;">
+                        <div class="track-switch-container">
+                            <button type="button" class="track-btn active" data-val="sayisal">SAY</button>
+                            <button type="button" class="track-btn" data-val="ea">EA</button>
+                            <button type="button" class="track-btn" data-val="sozel">SÖZ</button>
+                            <button type="button" class="track-btn" data-val="dil">DİL</button>
+                        </div>
+                        <input type="hidden" id="expandedAytTrack" value="sayisal">
+                    </div>
+                    <div id="examDefaultActionBtns" style="display:flex;gap:10px;width:100%;flex-wrap:wrap;">
+                        <div style="display:flex;flex:1;">
+                            <button class="save-note-btn" id="openExamSortBtn" style="flex:1;background-color:var(--color-primary-lighter);color:var(--color-primary);border:1px solid var(--color-primary-border);font-size:12px;font-weight:800;display:flex;justify-content:center;gap:6px;align-items:center;padding:10px 0;border-radius:var(--radius-md);transition:var(--transition-fast);">
+                                <i class="fa-solid fa-arrow-down-a-z"></i> Sırala
+                            </button>
+                            <button class="cancel-note-btn" id="resetExamSortBtn" style="background-color:var(--color-danger-light);color:var(--color-danger);border:1px solid #ffc2c2;border-left:none;padding:0 14px;border-radius:0 8px 8px 0;display:none;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition-fast);">
+                                <i class="fa-solid fa-xmark" style="font-size:15px;"></i>
+                            </button>
+                        </div>
+                        <div style="display:flex;flex:1;">
+                            <button class="save-note-btn" id="openExamFilterBtn" style="flex:1;background-color:var(--color-primary-lighter);color:var(--color-primary);border:1px solid var(--color-primary-border);font-size:12px;font-weight:800;display:flex;justify-content:center;gap:6px;align-items:center;padding:10px 0;border-radius:var(--radius-md);transition:var(--transition-fast);">
+                                <i class="fa-solid fa-filter"></i> Filtrele
+                            </button>
+                            <button class="cancel-note-btn" id="resetExamFilterBtn" style="background-color:var(--color-danger-light);color:var(--color-danger);border:1px solid #ffc2c2;border-left:none;padding:0 14px;border-radius:0 8px 8px 0;display:none;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition-fast);">
+                                <i class="fa-solid fa-xmark" style="font-size:15px;"></i>
+                            </button>
+                        </div>
+                        <button class="cancel-note-btn" id="toggleExamDeleteModeBtn" style="display:flex;align-items:center;justify-content:center;color:var(--color-danger);border:1px solid #ffc2c2;background-color:var(--color-danger-light);padding:0 14px;border-radius:var(--radius-md);transition:var(--transition-fast);">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div id="examDeleteActionBtns" style="display:none;width:100%;gap:10px;">
+                        <button class="cancel-note-btn" id="cancelExamDeleteBtn" style="flex:1;font-size:12px;font-weight:800;">İptal Et</button>
+                        <button class="save-note-btn" id="confirmExamDeleteBtn" style="flex:1;background-color:var(--color-danger);font-size:12px;font-weight:800;">Sil (0)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAĞ PANEL: GRAFİKLER -->
+            <div class="da-charts" id="expandedChartsContainer">
+                <div style="display:flex;justify-content:space-between;align-items:center;background:var(--color-bg-card);padding:12px 20px;border-radius:var(--radius-lg);border:1px solid #eef2f5;">
+                    <span style="font-size:14px;font-weight:800;color:var(--color-text-secondary);"><i class="fa-solid fa-chart-area" style="color:var(--color-primary);margin-right:5px;"></i> Detaylı Analiz Grafikleri</span>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="display:flex;align-items:center;gap:8px;background:var(--color-primary-lighter);padding:4px 10px;border-radius:var(--radius-md);border:1px solid var(--color-primary-border);">
+                            <div id="customTrendPeriodToggle" data-period="week" style="display:flex;background:#e9ecef;border-radius:var(--radius-lg);padding:2px;cursor:pointer;border:1px solid #dee2e6;user-select:none;" onclick="window.toggleTrendPeriod()">
+                                <div id="periodWeekBtn" style="padding:2px 8px;font-size:10px;font-weight:800;border-radius:10px;transition:var(--transition-base);background:var(--color-primary);color:var(--color-bg-card);box-shadow:0 2px 4px rgba(0,123,255,0.3);">Hafta</div>
+                                <div id="periodMonthBtn" style="padding:2px 8px;font-size:10px;font-weight:800;border-radius:10px;transition:var(--transition-base);background:transparent;color:#6c757d;">Ay</div>
+                            </div>
+                            <span style="color:var(--color-primary-border);margin:0 -2px;">|</span>
+                            <span id="expandedTrendlineSlopeText" style="font-size:11px;font-weight:800;color:var(--color-text-muted);min-width:85px;text-align:center;">0.00 net/hf</span>
+                            <label class="switch" style="margin:0;transform:scale(0.7);transform-origin:center;">
+                                <input type="checkbox" id="expandedTrendlineToggle" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;background:#fff8eb;padding:4px 10px;border-radius:var(--radius-md);border:1px solid #ffeeba;">
+                            <span style="font-size:11px;font-weight:800;color:#b58900;"><i class="fa-solid fa-bullseye"></i> Hedef</span>
+                            <label class="switch" style="margin:0;transform:scale(0.7);transform-origin:center;">
+                                <input type="checkbox" id="expandedTargetToggle" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="da-chart-box">
+                    <h4 style="margin-bottom:15px;color:var(--color-text-main);font-size:16px;font-weight:800;"><i class="fa-solid fa-chart-line" style="color:var(--color-primary);margin-right:5px;"></i> Genel Net Gidişatı</h4>
+                    <div style="height:280px;position:relative;"><canvas id="expandedMainChart"></canvas></div>
+                </div>
+                <h4 style="color:var(--color-text-secondary);font-size:15px;font-weight:800;margin-top:5px;margin-bottom:-5px;"><i class="fa-solid fa-layer-group" style="color:#ffc107;margin-right:5px;"></i> Ders Bazlı İlerleme</h4>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;" id="expandedSubjectChartsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="action-toast" id="actionToast"><div class="toast-content"><div class="toast-spinner"></div><span id="toastText">İşlem yapılıyor...</span></div></div>
+
+
+    <!-- DENEME EKLEME MODALI -->
+    <div id="examModal" class="custom-modal" style="z-index:3300;">
+        <style>
+            #examModalBodyFlex { flex-direction: row; }
+            #examModalRightCol .subject-inputs-container { max-height: 340px; overflow-y: auto; padding-right: 8px; }
+            @media (max-width: 800px) {
+                #examModalBodyFlex { flex-direction: column; overflow-y: auto; }
+            }
+        </style>
+        <div class="custom-modal-content" style="max-width:1000px; max-height:90vh; display:flex; flex-direction:column; background:var(--color-bg-page);">
+            <div class="modal-header" style="background:var(--color-bg-card); border-bottom:1px solid #eef2f5;">
+                <h3><i class="fa-solid fa-file-circle-plus" style="color:var(--color-primary);margin-right:8px;"></i> <span id="examModalTitle">Yeni Deneme Ekle</span></h3>
+                <span class="close-modal-btn" id="closeExamModalBtn">&times;</span>
+            </div>
+            
+            <div class="modal-body" id="examModalBodyFlex" style="display:flex; gap:25px; overflow:hidden; flex:1; padding:25px;">
+                
+                <!-- SOL SÜTUN -->
+                <div style="flex:1; display:flex; flex-direction:column; gap:20px; overflow-y:auto; padding-right:5px;">
+                    <div class="exam-tabs" style="background:var(--color-bg-card); padding:5px; border-radius:12px; display:flex; box-shadow:var(--shadow-xs); margin:0;">
+                        <button class="exam-tab-btn active" data-target="tyt-section" style="flex:1; border:none; padding:10px 0; border-radius:8px; font-size:14px; margin:0;">TYT Denemesi</button>
+                        <button class="exam-tab-btn" data-target="ayt-section" style="flex:1; border:none; padding:10px 0; border-radius:8px; font-size:14px; margin:0;">AYT Denemesi</button>
+                    </div>
+                    
+                    <div style="background:var(--color-bg-card); padding:18px; border-radius:14px; box-shadow:var(--shadow-xs); display:flex; flex-direction:column; gap:15px;">
+                        
+                        <!-- İSİM VE TARİH YAN YANA -->
+                        <div style="display:flex; gap:15px;">
+                            <div class="input-group" style="flex:2;">
+                                <label>Deneme Adı <span class="required-star">*</span></label>
+                                <input type="text" id="examTitleInput" class="modal-input" placeholder="Örn: 3D Türkiye Geneli" style="background:var(--color-bg-input); border-color:var(--color-border);">
+                            </div>
+                            <div class="input-group" style="flex:1;">
+                                <label>Tarih <span class="required-star">*</span></label>
+                                <input type="date" id="examDateInput" class="modal-input" style="background:var(--color-bg-input); border-color:var(--color-border);">
+                            </div>
+                        </div>
+                        
+                        <!-- YENİ HATA MESAJI ALANI BURADA -->
+                        <div id="examErrorMsg" class="error-msg" style="margin-top:-5px; text-align:left;"></div>
+                        
+                        <div id="aytTrackContainer" style="display:none;">
+                            <label style="font-size:13px;font-weight:700;color:var(--color-text-secondary);margin-bottom:6px;display:block;">Alan Seçimi</label>
+                            <div class="track-switch-container">
+                                <button type="button" class="track-btn active" data-val="sayisal">SAY</button>
+                                <button type="button" class="track-btn" data-val="ea">EA</button>
+                                <button type="button" class="track-btn" data-val="sozel">SÖZ</button>
+                                <button type="button" class="track-btn" data-val="dil">DİL</button>
+                            </div>
+                            <input type="hidden" id="aytTrackSelect" value="sayisal">
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1;"></div>
+                    
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));padding:20px;border-radius:14px;box-shadow:var(--shadow-primary);color:white; margin-top:10px;">
+                        <div style="display:flex;align-items:center;gap:15px;">
+                            <div style="background:rgba(255,255,255,0.2); padding:12px; border-radius:12px; display:flex;"><i class="fa-solid fa-calculator" style="font-size:24px;"></i></div>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:12px; font-weight:600; opacity:0.9; text-transform:uppercase; letter-spacing:0.5px;">Hesaplanan</span>
+                                <span style="font-size:18px;font-weight:800;">Toplam Net</span>
+                            </div>
+                        </div>
+                        <span id="totalNetValue" style="font-size:36px;font-weight:900;text-shadow:0 2px 5px rgba(0,0,0,0.2);">0.00</span>
+                    </div>
+                    <!-- Eskiden burada olan error-msg'yi sildik -->
+                </div>
+
+                <!-- SAĞ SÜTUN -->
+                <div id="examModalRightCol" style="flex:1.2; display:flex; flex-direction:column; background:var(--color-bg-card); padding:20px; border-radius:14px; box-shadow:var(--shadow-xs);">
+                    <h4 style="font-size:15px; font-weight:800; color:var(--color-text-secondary); margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid var(--color-border);"><i class="fa-solid fa-list-check" style="color:var(--color-primary); margin-right:8px;"></i> Ders Sonuçları</h4>
+                    
+                    <div id="tyt-section">
+                        <div id="tyt-subjects-container" class="subject-inputs-container"></div>
+                    </div>
+                    <div id="ayt-section" style="display:none;">
+                        <div id="ayt-subjects-container" class="subject-inputs-container"></div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="modal-footer" style="background:var(--color-bg-card); border-top:1px solid #eef2f5; border-bottom-left-radius:var(--radius-xl); border-bottom-right-radius:var(--radius-xl);">
+                <button class="cancel-note-btn" id="deleteExamBtn" style="background-color:var(--color-danger-light);color:var(--color-danger);border:1px solid #ffc2c2;display:none;padding:10px 15px;">
+                    <i class="fa-solid fa-trash"></i> Sil
+                </button>
+                <div style="flex:1;"></div>
+                <button class="cancel-note-btn" id="cancelExamBtn">İptal Et</button>
+                <button class="save-note-btn" id="saveExamBtn" style="padding:10px 25px; font-size:14px;"><i class="fa-solid fa-check" style="margin-right:5px;"></i> Denemeyi Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DENEME DETAY MODALI -->
+    <div id="viewExamModal" class="custom-modal" style="z-index:3200;">
+        <div class="custom-modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clipboard-list" style="color:var(--color-primary);margin-right:8px;"></i> Deneme Detayı</h3>
+                <span class="close-modal-btn" id="closeViewExamModalBtn">&times;</span>
+            </div>
+            <div class="modal-body" style="gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h4 id="viewExamTitle" style="font-size:18px;font-weight:800;color:var(--color-text-main);"></h4>
+                    <span id="viewExamTrackBadge" style="font-size:11px;font-weight:800;color:var(--color-primary);background:var(--color-primary-lighter);padding:4px 10px;border-radius:var(--radius-sm);"></span>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span id="viewExamDate" style="font-size:12px;font-weight:700;color:var(--color-text-muted);"></span>
+                    <span style="font-size:16px;font-weight:900;color:#17a2b8;background:#e0f7fa;padding:4px 10px;border-radius:var(--radius-sm);">Toplam: <span id="viewExamTotalNet">0</span> Net</span>
+                </div>
+                <div id="viewExamSubjects" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="save-note-btn" id="editExamBtn" style="background-color:var(--color-primary-lighter);color:var(--color-primary);border:1px solid var(--color-primary-border);"><i class="fa-solid fa-pen"></i> Düzenle</button>
+                <button class="cancel-note-btn" id="closeViewExamBtn">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONAY MODALLARI -->
+    <div id="examSaveConfirmModal" class="custom-modal" style="z-index:3400;">
+        <div class="custom-modal-content modal-centered">
+            <i class="fa-solid fa-circle-question" class="modal-icon-primary"></i>
+            <h3 class="modal-title">Değişiklikleri Kaydet</h3>
+            <p class="modal-desc">Denemedeki değişiklikleri kaydetmek istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="cancel-note-btn" onclick="document.getElementById('examSaveConfirmModal').style.display='none'">Hayır, Dön</button>
+                <button class="save-note-btn" id="yesExamSaveBtn">Evet, Kaydet</button>
+            </div>
+        </div>
+    </div>
+    <div id="examCancelConfirmModal" class="custom-modal" style="z-index:3400;">
+        <div class="custom-modal-content modal-centered">
+            <i class="fa-solid fa-triangle-exclamation" class="modal-icon-danger"></i>
+            <h3 class="modal-title">Kaydedilmemiş Değişiklikler</h3>
+            <p class="modal-desc">Kaydetmediğiniz veriler var. Çıkmak istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="cancel-note-btn" onclick="document.getElementById('examCancelConfirmModal').style.display='none'">Hayır, Kal</button>
+                <button class="save-note-btn bg-danger" id="yesExamCancelBtn">Evet, Çık</button>
+            </div>
+        </div>
+    </div>
+    <div id="examDeleteConfirmModal" class="custom-modal" style="z-index:3400;">
+        <div class="custom-modal-content modal-centered">
+            <i class="fa-solid fa-trash-can" class="modal-icon-danger"></i>
+            <h3 class="modal-title">Denemeyi Sil</h3>
+            <p class="modal-desc">Bu denemeyi kalıcı olarak silmek istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="cancel-note-btn" onclick="document.getElementById('examDeleteConfirmModal').style.display='none'">İptal</button>
+                <button class="save-note-btn bg-danger" id="yesExamDeleteBtn">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+    <div id="expandedExamMultiDeleteConfirmModal" class="custom-modal" style="z-index:3800;">
+        <div class="custom-modal-content modal-centered">
+            <i class="fa-solid fa-trash-can" class="modal-icon-danger"></i>
+            <h3 class="modal-title">Denemeleri Sil</h3>
+            <p id="expandedExamMultiDeleteMsg" class="modal-desc">Seçilen denemeleri kalıcı olarak silmek istediğinize emin misiniz?</p>
+            <div class="modal-actions">
+                <button class="cancel-note-btn" onclick="document.getElementById('expandedExamMultiDeleteConfirmModal').style.display='none'">İptal</button>
+                <button class="save-note-btn bg-danger" id="yesExpandedExamMultiDeleteBtn">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FİLTRE MODALI -->
+    <div id="examFilterModal" class="custom-modal" style="z-index:3500;">
+        <div class="custom-modal-content" style="max-width:450px;overflow:visible!important;border-radius:14px;position:relative;">
+            <div id="customToast" style="position:absolute;top:-75px;left:50%;width:90%;background:var(--color-bg-card);border-left:5px solid var(--color-danger);padding:12px 15px;box-shadow:0 4px 15px rgba(0,0,0,0.15);border-radius:var(--radius-md);display:flex;align-items:center;gap:12px;z-index:9999;transform:translate(-50%,20px);opacity:0;visibility:hidden;transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);">
+                <i class="fa-solid fa-circle-exclamation" id="toastIcon" style="color:var(--color-danger);font-size:24px;"></i>
+                <div><div style="font-weight:800;color:var(--color-text-main);font-size:13px;margin-bottom:2px;" id="toastTitle">Hata</div><div style="color:var(--color-text-muted);font-size:11px;font-weight:600;" id="toastMessage">Kontrol edin.</div></div>
+            </div>
+            <div class="modal-header" style="border-top-left-radius:14px;border-top-right-radius:14px;">
+                <h3><i class="fa-solid fa-filter" style="color:var(--color-primary);margin-right:8px;"></i> Denemeleri Filtrele</h3>
+                <span class="close-modal-btn" id="closeExamFilterModalBtn">&times;</span>
+            </div>
+            <div class="modal-body" style="gap:15px;overflow:visible!important;">
+                <div class="input-group">
+                    <label>Tarih Aralığı</label>
+                    <div class="task-custom-select" style="margin-bottom:10px;">
+                        <div class="tcs-trigger"><span class="tcs-text">Tüm Zamanlar</span> <i class="fa-solid fa-chevron-down"></i></div>
+                        <div class="tcs-options">
+                            <div class="tcs-option selected" data-value="all">Tüm Zamanlar</div>
+                            <div class="tcs-option" data-value="last30">Son 30 Gün</div>
+                            <div class="tcs-option" data-value="last90">Son 3 Ay</div>
+                            <div class="tcs-option" data-value="custom">Özel Tarih Aralığı Gir</div>
+                        </div>
+                        <input type="hidden" id="ef-datePreset" value="all">
+                    </div>
+                    <div id="ef-customDateGroup" style="display:none;gap:10px;">
+                        <input type="date" id="ef-startDate" class="modal-input">
+                        <input type="date" id="ef-endDate" class="modal-input">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Net Filtresi</label>
+                    <div class="task-custom-select" style="margin-bottom:10px;">
+                        <div class="tcs-trigger"><span class="tcs-text" id="ef-subject-text">Genel (Toplam Net)</span> <i class="fa-solid fa-chevron-down"></i></div>
+                        <div class="tcs-options" id="ef-subject-options"></div>
+                        <input type="hidden" id="ef-subject" value="total">
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <div class="custom-number-input" style="flex:1;">
+                            <input type="number" id="ef-minNet" class="modal-input no-spinner" placeholder="Min Net" step="0.25" style="padding-right:65px;">
+                            <div class="cni-controls" style="right:5px;"><button type="button" class="cni-btn" id="ef-minDown" style="width:26px;height:26px;"><i class="fa-solid fa-minus" style="font-size:10px;"></i></button><button type="button" class="cni-btn" id="ef-minUp" style="width:26px;height:26px;"><i class="fa-solid fa-plus" style="font-size:10px;"></i></button></div>
+                        </div>
+                        <div class="custom-number-input" style="flex:1;">
+                            <input type="number" id="ef-maxNet" class="modal-input no-spinner" placeholder="Max Net" step="0.25" style="padding-right:65px;">
+                            <div class="cni-controls" style="right:5px;"><button type="button" class="cni-btn" id="ef-maxDown" style="width:26px;height:26px;"><i class="fa-solid fa-minus" style="font-size:10px;"></i></button><button type="button" class="cni-btn" id="ef-maxUp" style="width:26px;height:26px;"><i class="fa-solid fa-plus" style="font-size:10px;"></i></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:space-between;border-bottom-left-radius:14px;border-bottom-right-radius:14px;">
+                <button class="cancel-note-btn" id="clearExamFilterBtn" style="color:var(--color-danger);border-color:#ffc2c2;">Filtreleri Temizle</button>
+                <button class="save-note-btn" id="applyExamFilterBtn" style="background-color:var(--color-primary);">Uygula</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIRALAMA MODALI -->
+    <div id="examSortModal" class="custom-modal" style="z-index:3500;">
+        <div class="custom-modal-content" style="max-width:400px;overflow:visible!important;border-radius:14px;">
+            <div class="modal-header" style="border-top-left-radius:14px;border-top-right-radius:14px;">
+                <h3><i class="fa-solid fa-arrow-down-a-z" style="color:var(--color-primary);margin-right:8px;"></i> Denemeleri Sırala</h3>
+                <span class="close-modal-btn" id="closeExamSortModalBtn">&times;</span>
+            </div>
+            <div class="modal-body" style="gap:15px;overflow:visible!important;">
+                <div class="input-group">
+                    <label>Sıralama Kriteri</label>
+                    <div class="task-custom-select">
+                        <div class="tcs-trigger"><span class="tcs-text">Tarih (Yeniden Eskiye)</span> <i class="fa-solid fa-chevron-down"></i></div>
+                        <div class="tcs-options">
+                            <div class="tcs-option selected" data-value="date-desc">Tarih (Yeniden Eskiye)</div>
+                            <div class="tcs-option" data-value="date-asc">Tarih (Eskiden Yeniye)</div>
+                            <div class="tcs-option" data-value="net-desc">Net (Yüksekten Düşüğe)</div>
+                            <div class="tcs-option" data-value="net-asc">Net (Düşükten Yükseğe)</div>
+                        </div>
+                        <input type="hidden" id="es-criteria" value="date-desc">
+                    </div>
+                </div>
+                <div class="input-group" id="sortSubjectGroup" style="display:none;">
+                    <label>Sıralama Dersi</label>
+                    <div class="task-custom-select">
+                        <div class="tcs-trigger"><span class="tcs-text">Genel (Toplam Net)</span> <i class="fa-solid fa-chevron-down"></i></div>
+                        <div class="tcs-options" id="es-subject-options"></div>
+                        <input type="hidden" id="es-subject" value="total">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-bottom-left-radius:14px;border-bottom-right-radius:14px;">
+                <button class="cancel-note-btn" id="closeExamSortBtn">İptal</button>
+                <button class="save-note-btn" id="applyExamSortBtn">Uygula</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YAN MENÜ -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header"><h2><i class="fa-solid fa-compass"></i> Menü</h2><button class="close-menu-btn" id="closeMenuBtn">&times;</button></div>
+        <div class="side-menu-content">
+            <a href="#" id="goHomeBtn" class="menu-item"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="ders.html" class="menu-item"><i class="fa-solid fa-book-open-reader"></i> Ders Çalış</a>
+            <a href="haftalikplanlayici.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Haftalık Planlayıcı</a>
+            <a href="playlistlerim.html" class="menu-item"><i class="fa-brands fa-youtube"></i> Playlistlerim</a>
+            <a href="denemeanaliz.html" class="menu-item active-page"><i class="fa-solid fa-chart-pie"></i> Deneme Analiz</a>
+            <a href="playlistmerkezi.html" class="menu-item"><i class="fa-brands fa-youtube" style="color:#ff3333;"></i> Playlist Merkezi</a>
+            <a href="profilayarlar.html" class="menu-item" id="sideMenuProfileBtn"><i class="fa-solid fa-user-gear"></i> Profil / Ayarlar</a>
+            <a href="admin.html" class="menu-item" id="sideMenuAdminBtn" style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Paneli</a>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <a href="index.html?action=login" class="menu-item" id="sideMenuLoginBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</a>
+                <a href="index.html?action=register" class="menu-item" id="sideMenuRegisterBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> Kaydol</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === ORTAK ===
+        function applySmartScale(){const w=window.innerWidth,h=window.innerHeight,els=document.querySelectorAll('.header,.template-content');if(w>900){const s=Math.min((w-380)/1400,h/900,1);els.forEach(e=>e.style.zoom=s);document.body.style.paddingBottom=Math.round(45*s)+'px';}else{els.forEach(e=>e.style.zoom=1);document.body.style.paddingBottom='45px';}}
+        let _st=null;window.addEventListener('resize',()=>{clearTimeout(_st);_st=setTimeout(applySmartScale,80);});window.addEventListener('DOMContentLoaded',applySmartScale);applySmartScale();
+        // YKS sayacı kaldırıldı
+        const sideMenu=document.getElementById('sideMenu'),menuOverlay=document.getElementById('menuOverlay');
+        document.getElementById('openMenuBtn').addEventListener('click',()=>{sideMenu.classList.add('open');menuOverlay.classList.add('show');});
+        document.getElementById('closeMenuBtn').addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        menuOverlay.addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        document.getElementById('goHomeBtn').addEventListener('click',e=>{e.preventDefault();sessionStorage.setItem('fromDers','true');window.location.href='index.html';});
+
+        // === TCS (Custom Select) MANTIK ===
+        document.addEventListener('click', function(e) {
+            // Trigger tıklaması
+            const trigger = e.target.closest('.tcs-trigger');
+            if (trigger) {
+                const select = trigger.closest('.task-custom-select');
+                document.querySelectorAll('.task-custom-select').forEach(s => { if(s !== select) s.classList.remove('open'); });
+                select.classList.toggle('open');
+                return;
+            }
+            // Option tıklaması
+            const option = e.target.closest('.tcs-option');
+            if (option) {
+                const select = option.closest('.task-custom-select');
+                const hidden = select.querySelector('input[type="hidden"]');
+                const textEl = select.querySelector('.tcs-text');
+                select.querySelectorAll('.tcs-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                if(textEl) textEl.textContent = option.textContent;
+                if(hidden) { hidden.value = option.getAttribute('data-value'); hidden.dispatchEvent(new Event('change')); }
+                select.classList.remove('open');
+                return;
+            }
+            // Dışarı tıklama
+            document.querySelectorAll('.task-custom-select').forEach(s => s.classList.remove('open'));
+        });
+
+        // === TOAST ===
+        window.showCustomToast = function(title, message, type = 'error') {
+            const toast = document.getElementById('customToast'); if(!toast) return;
+            const icon = document.getElementById('toastIcon');
+            if(type==='error'){toast.style.borderLeftColor='#d9534f';if(icon){icon.className='fa-solid fa-circle-exclamation';icon.style.color='#d9534f';}}
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+            toast.style.transform='translate(-50%, 0)';toast.style.opacity='1';toast.style.visibility='visible';
+            setTimeout(()=>{toast.style.transform='translate(-50%, 20px)';toast.style.opacity='0';toast.style.visibility='hidden';},3500);
+        };
+
+        function formatDateToTurkish(d){if(!d)return'';const p=d.split('-');return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d;}
+    </script>
+
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import{getFirestore,doc,setDoc,getDoc,collection,getDocs,deleteDoc}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        const app=initializeApp({apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8",authDomain:"tripturkey-79e75.firebaseapp.com",projectId:"tripturkey-79e75",storageBucket:"tripturkey-79e75.firebasestorage.app",messagingSenderId:"69790477258",appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33"});
+        const auth=getAuth(app),db=getFirestore(app);
+        let currentUserUid=null, savedExams=[], editingExamId=null, currentViewingExam=null;
+
+        // === VERİ YAPILARI ===
+        const subjectLimits={"Türkçe":40,"Sosyal Bilimler":20,"Temel Matematik":40,"Fen Bilimleri":20,"Matematik":40,"Fizik":14,"Kimya":13,"Biyoloji":13,"Türk Dili ve Edebiyatı":24,"Tarih-1":10,"Coğrafya-1":6,"Tarih-2":11,"Coğrafya-2":11,"Felsefe Grubu":12,"Din Kültürü":6,"Yabancı Dil":80};
+        const examSubjectsData={tyt:["Türkçe","Sosyal Bilimler","Temel Matematik","Fen Bilimleri"],ayt:{sayisal:["Matematik","Fizik","Kimya","Biyoloji"],ea:["Matematik","Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1"],sozel:["Türk Dili ve Edebiyatı","Tarih-1","Coğrafya-1","Tarih-2","Coğrafya-2","Felsefe Grubu","Din Kültürü"],dil:["Yabancı Dil"]}};
+        const NET_LIMITS={'tyt':{'total':120,'Türkçe':40,'Sosyal Bilimler':20,'Temel Matematik':40,'Fen Bilimleri':20},'ayt':{'sayisal':{'total':80,'Matematik':40,'Fizik':14,'Kimya':13,'Biyoloji':13},'ea':{'total':80,'Matematik':40,'Türk Dili ve Edebiyatı':24,'Tarih-1':10,'Coğrafya-1':6},'sozel':{'total':80,'Türk Dili ve Edebiyatı':24,'Tarih-1':10,'Coğrafya-1':6,'Tarih-2':11,'Coğrafya-2':11,'Felsefe Grubu':12,'Din Kültürü':6},'dil':{'total':80,'Yabancı Dil':80}}};
+
+        // Hedef netler (localStorage'dan)
+        window.targetNets = JSON.parse(localStorage.getItem('targetNets') || '{}');
+
+        // === DERSLERİ OLUŞTURMA ===
+        function buildSubjectRows(containerId, subjects) {
+            const c = document.getElementById(containerId); if(!c) return; c.innerHTML = '';
+            subjects.forEach(name => {
+                const limit = subjectLimits[name] || 40;
+                c.innerHTML += `<div class="subject-input-row" data-subject="${name}" data-limit="${limit}"><span class="subject-name">${name}</span><div class="dyb-inputs"><div class="dyb-box"><label>D</label><input type="number" class="dyb-input dyb-d" min="0" max="${limit}" placeholder="0"></div><div class="dyb-box"><label>Y</label><input type="number" class="dyb-input dyb-y" min="0" max="${limit}" placeholder="0"></div><div class="dyb-box"><label>B</label><input type="number" class="dyb-input dyb-b" min="0" max="${limit}" placeholder="0"></div></div></div>`;
+            });
+        }
+        // TYT varsayılan
+        buildSubjectRows('tyt-subjects-container', examSubjectsData.tyt);
+
+        function calculateTotalNet() {
+            const activeTab = document.querySelector('#examModal .exam-tab-btn.active')?.getAttribute('data-target');
+            const container = document.getElementById(activeTab === 'tyt-section' ? 'tyt-subjects-container' : 'ayt-subjects-container');
+            if(!container) return;
+            let totalNet = 0;
+            container.querySelectorAll('.subject-input-row').forEach(row => {
+                const d = parseInt(row.querySelector('.dyb-d')?.value) || 0;
+                const y = parseInt(row.querySelector('.dyb-y')?.value) || 0;
+                totalNet += d - (y * 0.25);
+            });
+            const el = document.getElementById('totalNetValue');
+            if(el) el.innerText = totalNet.toFixed(2);
+        }
+
+        // DYB input dinleyici ve Toplam Soru Sınırı Kontrolü
+        document.addEventListener('input', e => { 
+            if(e.target.classList.contains('dyb-input')) {
+                // Negatif sayı girişini engelle
+                if(parseInt(e.target.value) < 0) e.target.value = 0;
+
+                const row = e.target.closest('.subject-input-row');
+                const limit = parseInt(row.getAttribute('data-limit'));
+                const subjectName = row.querySelector('.subject-name').innerText;
+                
+                const dInput = row.querySelector('.dyb-d');
+                const yInput = row.querySelector('.dyb-y');
+                const bInput = row.querySelector('.dyb-b');
+                
+                let d = parseInt(dInput.value) || 0;
+                let y = parseInt(yInput.value) || 0;
+                let b = parseInt(bInput.value) || 0;
+
+                // Eğer Toplam (D + Y + B) sınırı aşıyorsa
+                if (d + y + b > limit) {
+                    const currentVal = parseInt(e.target.value) || 0;
+                    const otherSum = (d + y + b) - currentVal;
+                    let maxAllowed = limit - otherSum;
+                    
+                    if(maxAllowed < 0) maxAllowed = 0;
+                    e.target.value = maxAllowed; // Sınırı aşan inputu max izne çek
+                    
+                    // Toast bildirimi ile kullanıcıyı uyar
+                    if(typeof window.showCustomToast === 'function') {
+                        window.showCustomToast('Sınır Aşıldı!', `${subjectName} için D+Y+B toplamı en fazla ${limit} olabilir.`, 'error');
+                    }
+                }
+                
+                calculateTotalNet(); 
+            } 
+        });
+
+        // TAB DEĞİŞTİRME (examModal içi)
+        document.querySelectorAll('#examModal .exam-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#examModal .exam-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const target = btn.getAttribute('data-target');
+                document.getElementById('tyt-section').style.display = target === 'tyt-section' ? 'block' : 'none';
+                document.getElementById('ayt-section').style.display = target === 'ayt-section' ? 'block' : 'none';
+                document.getElementById('aytTrackContainer').style.display = target === 'ayt-section' ? 'block' : 'none';
+                if(target === 'ayt-section') {
+                    const track = document.getElementById('aytTrackSelect').value;
+                    buildSubjectRows('ayt-subjects-container', examSubjectsData.ayt[track] || []);
+                }
+                calculateTotalNet();
+            });
+        });
+        // YENİ ALAN SWITCH BUTONLARI DİNLEYİCİSİ
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('.track-btn');
+            if(btn) {
+                const container = btn.closest('.track-switch-container');
+                const hiddenInput = container.nextElementSibling;
+                container.querySelectorAll('.track-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                hiddenInput.value = btn.getAttribute('data-val');
+                hiddenInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        document.getElementById('aytTrackSelect')?.addEventListener('change', e => {
+            const val = e.target.value;
+            const container = e.target.previousElementSibling;
+            if(container && container.classList.contains('track-switch-container')) {
+                container.querySelectorAll('.track-btn').forEach(b => { b.classList.toggle('active', b.getAttribute('data-val') === val); });
+            }
+            buildSubjectRows('ayt-subjects-container', examSubjectsData.ayt[val] || []);
+            calculateTotalNet();
+        });
+
+        // === MODAL AÇ/KAPA ===
+        function closeExamModalAndClear() {
+            document.getElementById('examModal').style.display = 'none';
+            document.getElementById('examTitleInput').value = '';
+            document.getElementById('examDateInput').value = '';
+            editingExamId = null;
+            document.getElementById('deleteExamBtn').style.display = 'none';
+            document.getElementById('examModalTitle').innerText = 'Yeni Deneme Ekle';
+            document.getElementById('saveExamBtn').innerText = 'Denemeyi Ekle';
+            document.querySelectorAll('#examModal .exam-tab-btn')[0].click();
+            buildSubjectRows('tyt-subjects-container', examSubjectsData.tyt);
+            calculateTotalNet();
+        }
+
+        document.getElementById('expandedAddNewExamBtn')?.addEventListener('click', () => {
+            editingExamId = null;
+            document.getElementById('examModalTitle').innerText = 'Yeni Deneme Ekle';
+            document.getElementById('saveExamBtn').innerText = 'Denemeyi Ekle';
+            document.getElementById('deleteExamBtn').style.display = 'none';
+            document.getElementById('examTitleInput').value = '';
+            document.getElementById('examDateInput').value = '';
+            document.querySelectorAll('#examModal .exam-tab-btn')[0].click();
+            buildSubjectRows('tyt-subjects-container', examSubjectsData.tyt);
+            calculateTotalNet();
+            document.getElementById('examModal').style.display = 'flex';
+        });
+        document.getElementById('closeExamModalBtn')?.addEventListener('click', closeExamModalAndClear);
+        document.getElementById('cancelExamBtn')?.addEventListener('click', () => {
+            if(editingExamId) document.getElementById('examCancelConfirmModal').style.display = 'flex';
+            else closeExamModalAndClear();
+        });
+        document.getElementById('yesExamCancelBtn')?.addEventListener('click', () => {
+            document.getElementById('examCancelConfirmModal').style.display = 'none';
+            closeExamModalAndClear();
+        });
+
+        // === DENEME KAYDETME ===
+        async function executeSaveExam() {
+            const titleVal = document.getElementById('examTitleInput').value.trim();
+            const dateVal = document.getElementById('examDateInput').value;
+            const activeTab = document.querySelector('#examModal .exam-tab-btn.active')?.getAttribute('data-target');
+            const examType = activeTab === 'tyt-section' ? 'tyt' : 'ayt';
+            const track = examType === 'ayt' ? document.getElementById('aytTrackSelect').value : null;
+            const totalNet = document.getElementById('totalNetValue').innerText;
+            const container = document.getElementById(activeTab === 'tyt-section' ? 'tyt-subjects-container' : 'ayt-subjects-container');
+            let subjectsData = [];
+            container.querySelectorAll('.subject-input-row').forEach(row => {
+                const name = row.getAttribute('data-subject');
+                const d = parseInt(row.querySelector('.dyb-d')?.value) || 0;
+                const y = parseInt(row.querySelector('.dyb-y')?.value) || 0;
+                const b = parseInt(row.querySelector('.dyb-b')?.value) || 0;
+                const net = d - (y * 0.25);
+                subjectsData.push({name, d, y, b, net});
+            });
+            // subjectResults formatı (grafik uyumlu)
+            const subjectResults = subjectsData.map(s => ({subject: s.name, net: s.net}));
+
+            const examData = { id: editingExamId || Date.now(), title: titleVal, date: dateVal, type: examType, track, net: parseFloat(totalNet), subjects: subjectsData, subjectResults };
+
+            const btn = document.getElementById('saveExamBtn');
+            const orig = btn.innerText; btn.innerText = 'Kaydediliyor...'; btn.disabled = true;
+            try {
+                await setDoc(doc(db, "users", currentUserUid, "userExams", examData.id.toString()), examData);
+                if(editingExamId) { const idx = savedExams.findIndex(e => e.id === editingExamId); if(idx !== -1) savedExams[idx] = examData; }
+                else savedExams.push(examData);
+                closeExamModalAndClear();
+                window.renderExpandedExamsView();
+            } catch(e) { console.error(e); alert('Kaydetme hatası: ' + e.message); }
+            finally { btn.innerText = orig; btn.disabled = false; }
+        }
+
+        document.getElementById('saveExamBtn')?.addEventListener('click', () => {
+            const titleInput = document.getElementById('examTitleInput');
+            const dateInput = document.getElementById('examDateInput');
+            const t = titleInput.value.trim();
+            const d = dateInput.value;
+            const err = document.getElementById('examErrorMsg');
+
+            // Önce stilleri sıfırla (eğer daha önceden hata verip düzelttiyse kırmızılık gitsin)
+            titleInput.style.borderColor = '';
+            titleInput.style.boxShadow = '';
+            dateInput.style.borderColor = '';
+            dateInput.style.boxShadow = '';
+
+            // Hata kontrolü ve özel mesaj/stil ayarlama
+            if(!t || !d) { 
+                let errorText = '';
+                
+                if(!t && !d) {
+                    errorText = 'Lütfen Deneme Adı ve Tarihini girin!';
+                    titleInput.style.borderColor = 'var(--color-danger)';
+                    titleInput.style.boxShadow = '0 0 0 3px rgba(217,83,79,0.15)';
+                    dateInput.style.borderColor = 'var(--color-danger)';
+                    dateInput.style.boxShadow = '0 0 0 3px rgba(217,83,79,0.15)';
+                } else if(!t) {
+                    errorText = 'Lütfen Deneme Adını girin!';
+                    titleInput.style.borderColor = 'var(--color-danger)';
+                    titleInput.style.boxShadow = '0 0 0 3px rgba(217,83,79,0.15)';
+                } else if(!d) {
+                    errorText = 'Lütfen Tarihi girin!';
+                    dateInput.style.borderColor = 'var(--color-danger)';
+                    dateInput.style.boxShadow = '0 0 0 3px rgba(217,83,79,0.15)';
+                }
+
+                err.innerText = errorText; 
+                err.style.display = 'block'; 
+                
+                // 3 Saniye sonra kırmızılıkları ve mesajı temizle
+                setTimeout(() => {
+                    err.style.display = 'none';
+                    titleInput.style.borderColor = '';
+                    titleInput.style.boxShadow = '';
+                    dateInput.style.borderColor = '';
+                    dateInput.style.boxShadow = '';
+                }, 3000); 
+                
+                return; 
+            }
+            
+            if(!currentUserUid) { alert('Giriş yapmalısınız!'); return; }
+            if(editingExamId) document.getElementById('examSaveConfirmModal').style.display = 'flex';
+            else executeSaveExam();
+        });
+        document.getElementById('yesExamSaveBtn')?.addEventListener('click', () => { document.getElementById('examSaveConfirmModal').style.display = 'none'; executeSaveExam(); });
+
+        // === DENEME DETAY GÖRÜNTÜLEME ===
+        window.viewExamDetails = function(id) {
+            const exam = savedExams.find(e => e.id === id); if(!exam) return;
+            currentViewingExam = exam;
+            document.getElementById('viewExamTitle').innerText = exam.title;
+            document.getElementById('viewExamDate').innerHTML = `<i class="fa-regular fa-calendar-days"></i> ${formatDateToTurkish(exam.date)}`;
+            document.getElementById('viewExamTotalNet').innerText = parseFloat(exam.net).toFixed(2);
+            document.getElementById('viewExamTrackBadge').innerText = exam.type === 'tyt' ? 'TYT Genel' : `AYT - ${exam.track}`;
+            const sc = document.getElementById('viewExamSubjects'); sc.innerHTML = '';
+            if(exam.subjects && exam.subjects.length > 0) {
+                exam.subjects.forEach(sub => {
+                    if(sub.d===0 && sub.y===0 && sub.b===0 && sub.net===0) return;
+                    sc.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--color-primary-border);padding-bottom:6px;"><span style="font-size:13px;font-weight:800;color:var(--color-text-secondary);">${sub.name}</span><div style="display:flex;gap:8px;font-size:11px;font-weight:700;"><span style="color:var(--color-success);background:#e6f9ed;padding:2px 6px;border-radius:var(--radius-xs);">${sub.d} D</span><span style="color:var(--color-danger);background:#fdf3f2;padding:2px 6px;border-radius:var(--radius-xs);">${sub.y} Y</span><span style="color:#6c757d;background:var(--color-bg-input);padding:2px 6px;border-radius:var(--radius-xs);">${sub.b} B</span><span style="color:#17a2b8;font-weight:900;background:#e0f7fa;padding:2px 6px;border-radius:var(--radius-xs);margin-left:5px;">${sub.net.toFixed(2)} Net</span></div></div>`;
+                });
+            } else sc.innerHTML = '<span style="font-size:12px;color:#888;">Eski kayıt, detay yok. Düzenleyerek ekleyebilirsiniz.</span>';
+            document.getElementById('viewExamModal').style.display = 'flex';
+        };
+        document.getElementById('closeViewExamModalBtn')?.addEventListener('click', () => document.getElementById('viewExamModal').style.display = 'none');
+        document.getElementById('closeViewExamBtn')?.addEventListener('click', () => document.getElementById('viewExamModal').style.display = 'none');
+
+        // DÜZENLE
+        document.getElementById('editExamBtn')?.addEventListener('click', () => {
+            if(!currentViewingExam) return;
+            editingExamId = currentViewingExam.id;
+            document.getElementById('viewExamModal').style.display = 'none';
+            document.getElementById('examModalTitle').innerText = 'Denemeyi Düzenle';
+            document.getElementById('saveExamBtn').innerText = 'Güncelle';
+            document.getElementById('deleteExamBtn').style.display = 'block';
+            document.getElementById('examTitleInput').value = currentViewingExam.title;
+            document.getElementById('examDateInput').value = currentViewingExam.date;
+            // Tab seçimi
+            const tabs = document.querySelectorAll('#examModal .exam-tab-btn');
+            if(currentViewingExam.type === 'ayt') { tabs[1].click(); document.getElementById('aytTrackSelect').value = currentViewingExam.track || 'sayisal'; document.getElementById('aytTrackSelect').dispatchEvent(new Event('change')); }
+            else tabs[0].click();
+            // DYB doldurma
+            setTimeout(() => {
+                const containerId = currentViewingExam.type === 'tyt' ? 'tyt-subjects-container' : 'ayt-subjects-container';
+                if(currentViewingExam.subjects) {
+                    currentViewingExam.subjects.forEach(sub => {
+                        const row = document.querySelector(`#${containerId} .subject-input-row[data-subject="${sub.name}"]`);
+                        if(row) { row.querySelector('.dyb-d').value = sub.d || ''; row.querySelector('.dyb-y').value = sub.y || ''; row.querySelector('.dyb-b').value = sub.b || ''; }
+                    });
+                }
+                calculateTotalNet();
+            }, 100);
+            document.getElementById('examModal').style.display = 'flex';
+        });
+
+        // SİL
+        document.getElementById('deleteExamBtn')?.addEventListener('click', () => document.getElementById('examDeleteConfirmModal').style.display = 'flex');
+        document.getElementById('yesExamDeleteBtn')?.addEventListener('click', async () => {
+            document.getElementById('examDeleteConfirmModal').style.display = 'none';
+            if(!editingExamId || !currentUserUid) return;
+            try {
+                await deleteDoc(doc(db, "users", currentUserUid, "userExams", editingExamId.toString()));
+                savedExams = savedExams.filter(e => e.id !== editingExamId);
+                closeExamModalAndClear();
+                window.renderExpandedExamsView();
+            } catch(e) { alert('Silme hatası.'); }
+        });
+
+        // =================================================================
+        // ANA ANALİZ MOTORU (renderExpandedExamsView)
+        // =================================================================
+        let expandedMainChartInstance = null, expandedSubjectChartInstances = {};
+        let currentExpandedTab = 'tyt';
+        let isExpandedExamDeleteMode = false, expandedExamsToDelete = new Set();
+        let advExamFilter = { preset: 'all', start: '', end: '', subject: 'total', min: '', max: '' };
+        let advExamSort = { criteria: 'date-desc', subject: 'total' };
+
+        // TAB DEĞİŞTİRME
+        const expandedTabTyt = document.getElementById('expandedTabTyt');
+        const expandedTabAyt = document.getElementById('expandedTabAyt');
+        expandedTabTyt?.addEventListener('click', () => { expandedTabTyt.classList.add('active'); expandedTabAyt.classList.remove('active'); currentExpandedTab = 'tyt'; document.getElementById('expandedAytTrackSelector').style.display = 'none'; window.renderExpandedExamsView(); });
+        expandedTabAyt?.addEventListener('click', () => { expandedTabAyt.classList.add('active'); expandedTabTyt.classList.remove('active'); currentExpandedTab = 'ayt'; document.getElementById('expandedAytTrackSelector').style.display = 'block'; window.renderExpandedExamsView(); });
+        // AYT alan değişimi
+        document.getElementById('expandedAytTrack')?.addEventListener('change', e => {
+            const val = e.target.value;
+            const container = e.target.previousElementSibling;
+            if(container && container.classList.contains('track-switch-container')) {
+                container.querySelectorAll('.track-btn').forEach(b => { b.classList.toggle('active', b.getAttribute('data-val') === val); });
+            }
+            window.renderExpandedExamsView();
+        });
+
+        // LİNEER FİT HESAPLAYICI
+        function linearFit(xArr, yArr) {
+            const n = xArr.length; if(n < 2) return {slope:0, intercept:0};
+            let sx=0,sy=0,sxy=0,sxx=0;
+            for(let i=0;i<n;i++){sx+=xArr[i];sy+=yArr[i];sxy+=xArr[i]*yArr[i];sxx+=xArr[i]*xArr[i];}
+            const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+            const intercept=(sy-slope*sx)/n;
+            return {slope, intercept};
+        }
+
+        // FİREBASE: GRAFİK AYARLARINI KAYDET
+        async function saveExamSettingsToFirebase() {
+            if(!currentUserUid) return;
+            const showTrend = document.getElementById('expandedTrendlineToggle')?.checked ?? true;
+            const showTarget = document.getElementById('expandedTargetToggle')?.checked ?? true;
+            const trendPeriod = document.getElementById('customTrendPeriodToggle')?.getAttribute('data-period') || 'week';
+            
+            try {
+                await setDoc(doc(db, "users", currentUserUid), {
+                    examSettings: { showTrend, showTarget, trendPeriod }
+                }, { merge: true });
+            } catch(e) { console.error("Grafik ayarları kaydedilemedi:", e); }
+        }
+
+        // TREND PERİYOT DEĞİŞTİRME
+        window.toggleTrendPeriod = function() {
+            const toggle = document.getElementById('customTrendPeriodToggle');
+            const current = toggle.getAttribute('data-period');
+            const next = current === 'week' ? 'month' : 'week';
+            toggle.setAttribute('data-period', next);
+            const weekBtn = document.getElementById('periodWeekBtn'), monthBtn = document.getElementById('periodMonthBtn');
+            if(next === 'week') { weekBtn.style.background='var(--color-primary)';weekBtn.style.color='var(--color-bg-card)';weekBtn.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'; monthBtn.style.background='transparent';monthBtn.style.color='#6c757d';monthBtn.style.boxShadow='none'; }
+            else { monthBtn.style.background='var(--color-primary)';monthBtn.style.color='var(--color-bg-card)';monthBtn.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'; weekBtn.style.background='transparent';weekBtn.style.color='#6c757d';weekBtn.style.boxShadow='none'; }
+            
+            saveExamSettingsToFirebase();
+            window.renderExpandedExamsView();
+        };
+
+        // ANA RENDER
+        window.renderExpandedExamsView = function() {
+            const listContainer = document.getElementById('expandedExamsList');
+            const mainChartCanvas = document.getElementById('expandedMainChart');
+            const subjectsContainer = document.getElementById('expandedSubjectChartsContainer');
+            const countDisplay = document.getElementById('expandedExamCount');
+            if(!listContainer || !mainChartCanvas || !subjectsContainer) return;
+
+            // FİLTRELEME
+            let filtered = savedExams.filter(e => e.type === currentExpandedTab);
+            if(currentExpandedTab === 'ayt') { const trk = document.getElementById('expandedAytTrack')?.value || 'sayisal'; filtered = filtered.filter(e => e.track === trk); }
+            if(advExamFilter.preset === 'last30') { const ld = new Date(); ld.setDate(ld.getDate()-30); filtered = filtered.filter(e => new Date(e.date)>=ld); }
+            else if(advExamFilter.preset === 'last90') { const ld = new Date(); ld.setDate(ld.getDate()-90); filtered = filtered.filter(e => new Date(e.date)>=ld); }
+            else if(advExamFilter.preset === 'custom' && advExamFilter.start && advExamFilter.end) { const sD=new Date(advExamFilter.start),eD=new Date(advExamFilter.end);eD.setHours(23,59,59); filtered=filtered.filter(e=>{const d=new Date(e.date);return d>=sD&&d<=eD;}); }
+            if(advExamFilter.min !== '' || advExamFilter.max !== '') {
+                filtered = filtered.filter(e => {
+                    let tNet = advExamFilter.subject === 'total' ? parseFloat(e.net) : (e.subjects?.find(s=>s.name===advExamFilter.subject)?.net || 0);
+                    return (advExamFilter.min === '' || tNet >= parseFloat(advExamFilter.min)) && (advExamFilter.max === '' || tNet <= parseFloat(advExamFilter.max));
+                });
+            }
+
+            let sortedForCharts = [...filtered].sort((a,b) => new Date(a.date)-new Date(b.date));
+            let sortedForList = [...filtered];
+            if(advExamSort.criteria==='date-desc') sortedForList.sort((a,b)=>new Date(b.date)-new Date(a.date));
+            if(advExamSort.criteria==='date-asc') sortedForList.sort((a,b)=>new Date(a.date)-new Date(b.date));
+            if(advExamSort.criteria==='net-desc'||advExamSort.criteria==='net-asc') {
+                sortedForList.sort((a,b)=>{
+                    let nA=advExamSort.subject==='total'?parseFloat(a.net):(a.subjects?.find(s=>s.name===advExamSort.subject)?.net||-1);
+                    let nB=advExamSort.subject==='total'?parseFloat(b.net):(b.subjects?.find(s=>s.name===advExamSort.subject)?.net||-1);
+                    return advExamSort.criteria==='net-desc'?nB-nA:nA-nB;
+                });
+            }
+            countDisplay.innerText = sortedForList.length;
+
+            // Sıfırlama butonları görünürlüğü ve dinamik köşe yuvarlatma
+            const btnSortReset = document.getElementById('resetExamSortBtn'), btnSortOpen = document.getElementById('openExamSortBtn');
+            const btnFilterReset = document.getElementById('resetExamFilterBtn'), btnFilterOpen = document.getElementById('openExamFilterBtn');
+            const isSortActive = advExamSort.criteria !== 'date-desc' || advExamSort.subject !== 'total';
+            const isFilterActive = advExamFilter.preset !== 'all' || advExamFilter.min !== '' || advExamFilter.max !== '' || advExamFilter.subject !== 'total';
+            
+            if(btnSortReset) {
+                btnSortReset.style.display = isSortActive ? 'flex' : 'none';
+                if(btnSortOpen) btnSortOpen.style.borderRadius = isSortActive ? 'var(--radius-md) 0 0 8px' : 'var(--radius-md)';
+            }
+            if(btnFilterReset) {
+                btnFilterReset.style.display = isFilterActive ? 'flex' : 'none';
+                if(btnFilterOpen) btnFilterOpen.style.borderRadius = isFilterActive ? 'var(--radius-md) 0 0 8px' : 'var(--radius-md)';
+            }
+
+            // LİSTE
+            listContainer.innerHTML = '';
+            if(sortedForList.length === 0) { listContainer.innerHTML = '<div class="placeholder-text"><i class="fa-solid fa-clipboard-list" style="font-size:30px;margin-bottom:10px;display:block;color:var(--color-primary-border);"></i>Bu filtrelere uygun deneme bulunamadı.</div>'; }
+            else {
+                sortedForList.forEach(ex => {
+                    const isTargeted = isExpandedExamDeleteMode && expandedExamsToDelete.has(ex.id);
+                    listContainer.innerHTML += `<div class="da-exam-card ${isTargeted?'targeted':''}" onclick="window.handleExamCardClick(${ex.id})"><div class="da-exam-card-left"><span class="da-exam-title">${ex.title}</span><span class="da-exam-date"><i class="fa-regular fa-calendar-days"></i> ${formatDateToTurkish(ex.date)}</span></div><div class="da-exam-net">${parseFloat(ex.net).toFixed(2)}</div></div>`;
+                });
+            }
+
+            // GRAFİKLER
+            const showTrend = document.getElementById('expandedTrendlineToggle')?.checked;
+            const showTarget = document.getElementById('expandedTargetToggle')?.checked;
+            const trendPeriod = document.getElementById('customTrendPeriodToggle')?.getAttribute('data-period') || 'week';
+
+            // Ana grafik
+            if(expandedMainChartInstance) { expandedMainChartInstance.destroy(); expandedMainChartInstance = null; }
+            
+            const msPerDay = 86400000;
+            const netDataPoints = sortedForCharts.map(e => ({ x: new Date(e.date).getTime(), y: parseFloat(e.net) }));
+            const datasets = [{label:'Toplam Net',data:netDataPoints,borderColor:'var(--color-primary)',backgroundColor:'rgba(0,123,255,0.08)',borderWidth:3,fill:true,tension:0.3,pointRadius:5,pointHitRadius:25,pointHoverRadius:8,pointBackgroundColor:'var(--color-primary)',pointBorderColor:'#fff',pointBorderWidth:2}];
+
+            // Trend çizgisi (Artık tam zamanlı matematik)
+            if(showTrend && sortedForCharts.length >= 2) {
+                const xArr = sortedForCharts.map(e => new Date(e.date).getTime() / msPerDay);
+                const yArr = sortedForCharts.map(e => parseFloat(e.net));
+                const fit = linearFit(xArr, yArr);
+                const trendData = sortedForCharts.map(e => {
+                    const t = new Date(e.date).getTime();
+                    return { x: t, y: fit.slope * (t / msPerDay) + fit.intercept };
+                });
+                datasets.push({label:'Trend',data:trendData,borderColor:'rgba(255,99,132,0.6)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false,tension:0});
+                
+                // Slope hesaplama
+                const slopeText = document.getElementById('expandedTrendlineSlopeText');
+                if(slopeText) {
+                    const periodLabel = trendPeriod === 'week' ? 'net/hf' : 'net/ay';
+                    const multiplier = trendPeriod === 'week' ? 7 : 30; // Tam 7 veya 30 gün
+                    const slopeVal = (fit.slope * multiplier).toFixed(2);
+                    slopeText.innerText = `${slopeVal > 0 ? '+' : ''}${slopeVal} ${periodLabel}`;
+                    slopeText.style.color = fit.slope >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+                }
+            }
+
+            // Hedef çizgisi
+            if(showTarget) {
+                const targetKey = currentExpandedTab === 'tyt' ? 'TYT' : 'AYT';
+                const targetVal = parseFloat(window.targetNets[targetKey]);
+                if(targetVal && sortedForCharts.length > 0) {
+                    const targetData = sortedForCharts.map(e => ({ x: new Date(e.date).getTime(), y: targetVal }));
+                    datasets.push({label:'Hedef Net',data:targetData,borderColor:'rgba(255,193,7,0.7)',borderWidth:2,borderDash:[10,5],pointRadius:0,fill:false});
+                }
+            }
+
+            if(sortedForCharts.length > 0) {
+                const padMs = 2 * 86400000;
+                const xMin = new Date(sortedForCharts[0].date).getTime() - padMs;
+                const xMax = new Date(sortedForCharts[sortedForCharts.length - 1].date).getTime() + padMs;
+                expandedMainChartInstance = new Chart(mainChartCanvas, {type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},onClick:function(e,els){const t=els.find(el=>el.datasetIndex===0);if(t)window.handleExamCardClick(sortedForCharts[t.index].id);},onHover:function(e,els){e.native.target.style.cursor=els.find(el=>el.datasetIndex===0)?'pointer':'default';},plugins:{legend:{position:'bottom',labels:{font:{size:11,weight:'bold'},usePointStyle:true,padding:15}},tooltip:{filter:function(item){return item.datasetIndex===0;},callbacks:{title:function(ctx){return sortedForCharts[ctx[0].dataIndex].title;},afterTitle:function(ctx){return formatDateToTurkish(sortedForCharts[ctx[0].dataIndex].date);}}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}},x:{type:'linear',min:xMin,max:xMax,grid:{display:false},ticks:{callback:function(val){const d=new Date(val);return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();}}}}}});
+            }
+
+            // Ders bazlı grafikler
+            Object.values(expandedSubjectChartInstances).forEach(c => c.destroy());
+            expandedSubjectChartInstances = {};
+            subjectsContainer.innerHTML = '';
+            const subjects = currentExpandedTab === 'tyt' ? examSubjectsData.tyt : (examSubjectsData.ayt[document.getElementById('expandedAytTrack')?.value || 'sayisal'] || []);
+            const COLORS = ['#007bff','#28a745','#ffc107','#dc3545','#6f42c1','#17a2b8','#fd7e14','#20c997'];
+            const msPerDay2 = 86400000;
+            
+            subjects.forEach((subj, idx) => {
+                const canvasId = 'subChart_' + idx;
+                const color = COLORS[idx % COLORS.length];
+                
+                const sDataPoints = sortedForCharts.map(e => {
+                    const sr = e.subjectResults?.find(s => s.subject === subj);
+                    let net = 0;
+                    if(sr) net = parseFloat(sr.net);
+                    else { const s = e.subjects?.find(s => s.name === subj); if(s) net = parseFloat(s.net); }
+                    return { x: new Date(e.date).getTime(), y: net };
+                });
+
+                const sDatasets = [{label:subj+' Net',data:sDataPoints,borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:0.3,pointRadius:4,pointHitRadius:25,pointHoverRadius:7,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:2}];
+
+                let trendHtml = '';
+                if(showTrend && sDataPoints.length >= 2) {
+                    const xA = sortedForCharts.map(e => new Date(e.date).getTime() / msPerDay2);
+                    const yA = sDataPoints.map(p => p.y);
+                    const fit = linearFit(xA, yA);
+                    const sTrendData = sortedForCharts.map(e => {
+                        const t = new Date(e.date).getTime();
+                        return { x: t, y: fit.slope * (t / msPerDay2) + fit.intercept };
+                    });
+                    sDatasets.push({label:'Trend',data:sTrendData,borderColor:'rgba(255,99,132,0.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false});
+                    
+                    const multiplier = trendPeriod === 'week' ? 7 : 30;
+                    const slopeVal = (fit.slope * multiplier).toFixed(2);
+                    const slopeColor = fit.slope >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+                    const periodLabel = trendPeriod === 'week' ? 'net/hf' : 'net/ay';
+                    trendHtml = `<span style="font-size:11px;font-weight:800;color:${slopeColor};background:var(--color-bg-input);padding:2px 6px;border-radius:4px;border:1px solid ${slopeColor}33;">${slopeVal > 0 ? '+' : ''}${slopeVal} <span style="font-size:9px;color:var(--color-text-muted);">${periodLabel}</span></span>`;
+                }
+
+                const box = document.createElement('div');
+                box.style.cssText = 'background:var(--color-bg-card);border-radius:12px;padding:15px;border:1px solid var(--color-border);box-shadow:0 2px 8px rgba(0,0,0,0.02);';
+                box.innerHTML = `<h5 style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;color:var(--color-text-secondary);margin-bottom:10px;"><div style="display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-book" style="color:${color};"></i> ${subj}</div>${trendHtml}</h5><div style="height:180px;position:relative;"><canvas id="${canvasId}"></canvas></div>`;
+                subjectsContainer.appendChild(box);
+
+                if(sDataPoints.length > 0) {
+                    const padMs2 = 2 * 86400000;
+                    const xMin2 = new Date(sortedForCharts[0].date).getTime() - padMs2;
+                    const xMax2 = new Date(sortedForCharts[sortedForCharts.length - 1].date).getTime() + padMs2;
+                    expandedSubjectChartInstances[canvasId] = new Chart(document.getElementById(canvasId), {type:'line',data:{datasets:sDatasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},onClick:function(e,els){const t=els.find(el=>el.datasetIndex===0);if(t)window.handleExamCardClick(sortedForCharts[t.index].id);},onHover:function(e,els){e.native.target.style.cursor=els.find(el=>el.datasetIndex===0)?'pointer':'default';},plugins:{legend:{display:false},tooltip:{filter:function(item){return item.datasetIndex===0;},callbacks:{title:function(ctx){return sortedForCharts[ctx[0].dataIndex].title;},afterTitle:function(ctx){return formatDateToTurkish(sortedForCharts[ctx[0].dataIndex].date);}}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{type:'linear',min:xMin2,max:xMax2,grid:{display:false},ticks:{font:{size:9},callback:function(val){const d=new Date(val);return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear().toString().slice(-2);}}}}}});
+                }
+            });
+        };
+
+        // Kart tıklama yöneticisi (silme modu veya detay)
+        window.handleExamCardClick = function(id) {
+            if(isExpandedExamDeleteMode) {
+                if(expandedExamsToDelete.has(id)) expandedExamsToDelete.delete(id); else expandedExamsToDelete.add(id);
+                document.getElementById('confirmExamDeleteBtn').innerText = `Sil (${expandedExamsToDelete.size})`;
+                window.renderExpandedExamsView();
+            } else window.viewExamDetails(id);
+        };
+
+        // TREND/HEDEF TOGGLE DİNLEYİCİLERİ
+        document.getElementById('expandedTrendlineToggle')?.addEventListener('change', () => {
+            saveExamSettingsToFirebase();
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('expandedTargetToggle')?.addEventListener('change', () => {
+            saveExamSettingsToFirebase();
+            window.renderExpandedExamsView();
+        });
+
+        // FİLTRE MODALI
+        document.getElementById('openExamFilterBtn')?.addEventListener('click', () => {
+            // Ders seçeneklerini doldur
+            const opts = document.getElementById('ef-subject-options'); if(opts) {
+                opts.innerHTML = '<div class="tcs-option selected" data-value="total">Genel (Toplam Net)</div>';
+                const subs = currentExpandedTab === 'tyt' ? examSubjectsData.tyt : (examSubjectsData.ayt[document.getElementById('expandedAytTrack')?.value || 'sayisal'] || []);
+                subs.forEach(s => opts.innerHTML += `<div class="tcs-option" data-value="${s}">${s}</div>`);
+            }
+            document.getElementById('examFilterModal').style.display = 'flex';
+        });
+        document.getElementById('closeExamFilterModalBtn')?.addEventListener('click', () => document.getElementById('examFilterModal').style.display = 'none');
+        document.getElementById('applyExamFilterBtn')?.addEventListener('click', () => {
+            advExamFilter.preset = document.getElementById('ef-datePreset')?.value || 'all';
+            advExamFilter.start = document.getElementById('ef-startDate')?.value || '';
+            advExamFilter.end = document.getElementById('ef-endDate')?.value || '';
+            advExamFilter.subject = document.getElementById('ef-subject')?.value || 'total';
+            advExamFilter.min = document.getElementById('ef-minNet')?.value || '';
+            advExamFilter.max = document.getElementById('ef-maxNet')?.value || '';
+            document.getElementById('examFilterModal').style.display = 'none';
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('clearExamFilterBtn')?.addEventListener('click', () => {
+            advExamFilter = {preset:'all',start:'',end:'',subject:'total',min:'',max:''};
+            document.getElementById('examFilterModal').style.display = 'none';
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('resetExamFilterBtn')?.addEventListener('click', () => { advExamFilter={preset:'all',start:'',end:'',subject:'total',min:'',max:''}; window.renderExpandedExamsView(); });
+
+        // Tarih preset değişimi
+        document.getElementById('ef-datePreset')?.addEventListener('change', function() {
+            const g = document.getElementById('ef-customDateGroup');
+            if(g) g.style.display = this.value === 'custom' ? 'flex' : 'none';
+        });
+
+        // +/- butonları
+        ['ef-minUp','ef-minDown','ef-maxUp','ef-maxDown'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => {
+                const inp = document.getElementById(id.includes('min') ? 'ef-minNet' : 'ef-maxNet');
+                if(!inp) return;
+                let v = parseFloat(inp.value) || 0;
+                v += id.includes('Up') ? 0.25 : -0.25;
+                if(v < 0) v = 0;
+                inp.value = v;
+            });
+        });
+
+        // SIRALAMA MODALI
+        document.getElementById('openExamSortBtn')?.addEventListener('click', () => {
+            const opts = document.getElementById('es-subject-options'); if(opts) {
+                opts.innerHTML = '<div class="tcs-option selected" data-value="total">Genel (Toplam Net)</div>';
+                const subs = currentExpandedTab === 'tyt' ? examSubjectsData.tyt : (examSubjectsData.ayt[document.getElementById('expandedAytTrack')?.value || 'sayisal'] || []);
+                subs.forEach(s => opts.innerHTML += `<div class="tcs-option" data-value="${s}">${s}</div>`);
+            }
+            // Net sıralamasıysa ders seçimi göster
+            const sortSubjectGroup = document.getElementById('sortSubjectGroup');
+            const currentCriteria = document.getElementById('es-criteria')?.value || 'date-desc';
+            if(sortSubjectGroup) sortSubjectGroup.style.display = (currentCriteria === 'net-desc' || currentCriteria === 'net-asc') ? 'block' : 'none';
+            document.getElementById('examSortModal').style.display = 'flex';
+        });
+        document.getElementById('closeExamSortModalBtn')?.addEventListener('click', () => document.getElementById('examSortModal').style.display = 'none');
+        document.getElementById('closeExamSortBtn')?.addEventListener('click', () => document.getElementById('examSortModal').style.display = 'none');
+        document.getElementById('applyExamSortBtn')?.addEventListener('click', () => {
+            advExamSort.criteria = document.getElementById('es-criteria')?.value || 'date-desc';
+            advExamSort.subject = document.getElementById('es-subject')?.value || 'total';
+            document.getElementById('examSortModal').style.display = 'none';
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('resetExamSortBtn')?.addEventListener('click', () => { advExamSort={criteria:'date-desc',subject:'total'}; window.renderExpandedExamsView(); });
+
+        // Sıralama kriteri değişince ders seçimi göster/gizle
+        document.getElementById('es-criteria')?.addEventListener('change', function() {
+            const g = document.getElementById('sortSubjectGroup');
+            if(g) g.style.display = (this.value === 'net-desc' || this.value === 'net-asc') ? 'block' : 'none';
+        });
+
+        // ÇOKLU SİLME MODU
+        document.getElementById('toggleExamDeleteModeBtn')?.addEventListener('click', () => {
+            isExpandedExamDeleteMode = true; expandedExamsToDelete.clear();
+            document.getElementById('examDefaultActionBtns').style.display = 'none';
+            document.getElementById('examDeleteActionBtns').style.display = 'flex';
+            document.getElementById('confirmExamDeleteBtn').innerText = 'Sil (0)';
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('cancelExamDeleteBtn')?.addEventListener('click', () => {
+            isExpandedExamDeleteMode = false; expandedExamsToDelete.clear();
+            document.getElementById('examDefaultActionBtns').style.display = 'flex';
+            document.getElementById('examDeleteActionBtns').style.display = 'none';
+            window.renderExpandedExamsView();
+        });
+        document.getElementById('confirmExamDeleteBtn')?.addEventListener('click', () => {
+            if(expandedExamsToDelete.size === 0) return;
+            document.getElementById('expandedExamMultiDeleteMsg').innerText = `Seçilen ${expandedExamsToDelete.size} denemeyi kalıcı olarak silmek istediğinize emin misiniz?`;
+            document.getElementById('expandedExamMultiDeleteConfirmModal').style.display = 'flex';
+        });
+        document.getElementById('yesExpandedExamMultiDeleteBtn')?.addEventListener('click', async () => {
+            document.getElementById('expandedExamMultiDeleteConfirmModal').style.display = 'none';
+            const btn = document.getElementById('confirmExamDeleteBtn');
+            btn.innerText = 'Siliniyor...'; btn.disabled = true;
+            try {
+                for(const id of expandedExamsToDelete) {
+                    await deleteDoc(doc(db, "users", currentUserUid, "userExams", id.toString()));
+                    savedExams = savedExams.filter(e => e.id !== id);
+                }
+                isExpandedExamDeleteMode = false; expandedExamsToDelete.clear();
+                document.getElementById('examDefaultActionBtns').style.display = 'flex';
+                document.getElementById('examDeleteActionBtns').style.display = 'none';
+                window.renderExpandedExamsView();
+            } catch(e) { alert('Silme hatası.'); btn.innerText = `Sil (${expandedExamsToDelete.size})`; }
+            finally { btn.disabled = false; }
+        });
+
+        // === AUTH ===
+        onAuthStateChanged(auth, async (user) => {
+            const authContainer = document.getElementById('headerAuthContainer');
+            if(user) {
+                currentUserUid = user.uid;
+                let displayName = user.displayName || 'Profil';
+                try { const ud = await getDoc(doc(db,"users",user.uid)); if(ud.exists()&&ud.data().username) displayName=ud.data().username; } catch(e) {}
+                authContainer.innerHTML = `<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ${displayName}</span>`;
+                if(document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display='none';
+                if(document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display='none';
+                
+                // Denemeleri, Hedef Netleri ve Grafik Ayarlarını çek
+                try {
+                    // 1. Denemeleri al
+                    const snap = await getDocs(collection(db,"users",user.uid,"userExams"));
+                    savedExams = []; snap.forEach(d => savedExams.push(d.data()));
+
+                    // 2. Kullanıcı belgesini al (Ayarlar ve Hedefler)
+                    const userDoc = await getDoc(doc(db,"users",user.uid));
+                    if(userDoc.exists()) {
+                        const data = userDoc.data();
+                        
+                        // 👇 YENİ EKLENEN: Admin yetkisi kontrolü 👇
+                        if (data.isAdmin === true) {
+                            if (document.getElementById('sideMenuAdminBtn')) {
+                                document.getElementById('sideMenuAdminBtn').style.display = '';
+                            }
+                        }
+                        // 👆 YENİ EKLENEN KISIM BİTTİ 👆
+                        
+                        // Hedef netleri ata
+                        if(data.targetNets) { 
+                            window.targetNets = data.targetNets; 
+                            localStorage.setItem('targetNets', JSON.stringify(data.targetNets)); 
+                        }
+
+                        // Grafik ayarları varsa butonları güncelle
+                        if(data.examSettings) {
+                            const tToggle = document.getElementById('expandedTrendlineToggle');
+                            if(tToggle && data.examSettings.showTrend !== undefined) tToggle.checked = data.examSettings.showTrend;
+                            
+                            const htToggle = document.getElementById('expandedTargetToggle');
+                            if(htToggle && data.examSettings.showTarget !== undefined) htToggle.checked = data.examSettings.showTarget;
+                            
+                            if(data.examSettings.trendPeriod) {
+                                const ptToggle = document.getElementById('customTrendPeriodToggle');
+                                if(ptToggle) {
+                                    ptToggle.setAttribute('data-period', data.examSettings.trendPeriod);
+                                    const weekBtn = document.getElementById('periodWeekBtn'), monthBtn = document.getElementById('periodMonthBtn');
+                                    if(data.examSettings.trendPeriod === 'week') { weekBtn.style.background='var(--color-primary)';weekBtn.style.color='var(--color-bg-card)';weekBtn.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'; monthBtn.style.background='transparent';monthBtn.style.color='#6c757d';monthBtn.style.boxShadow='none'; }
+                                    else { monthBtn.style.background='var(--color-primary)';monthBtn.style.color='var(--color-bg-card)';monthBtn.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'; weekBtn.style.background='transparent';weekBtn.style.color='#6c757d';weekBtn.style.boxShadow='none'; }
+                                }
+                            }
+                        }
+                    }
+
+                    // 3. Her şey ayarlandıktan sonra grafikleri çiz
+                    window.renderExpandedExamsView();
+                } catch(e) { console.error("Veri çekme hatası:", e); }
+            } else {
+                currentUserUid = null; savedExams = [];
+                authContainer.innerHTML = `<button class="btn-outline" onclick="window.location.href='index.html?action=login'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href='index.html?action=register'">Kaydol</button>`;
+                if(document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display='';
+                if(document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display='';
+                document.getElementById('expandedExamsList').innerHTML = '<div class="placeholder-text"><i class="fa-solid fa-right-to-bracket" style="font-size:30px;margin-bottom:10px;display:block;color:var(--color-primary-border);"></i>Deneme analizlerini görmek için giriş yapın.</div>';
+            }
+            setTimeout(() => document.getElementById('mainPageLoader').classList.add('hidden'), 300);
+        });
+    </script>
+</body>
+</html>

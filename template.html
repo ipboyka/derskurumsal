@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Planlayıcı | Template</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ============================================================
+           TEMA SİSTEMİ — ders.html ile birebir aynı değişkenler.
+           ============================================================ */
+        :root {
+            --color-primary:          #007bff;
+            --color-primary-hover:    #0056b3;
+            --color-primary-light:    #e6f2ff;
+            --color-primary-lighter:  #f0f8ff;
+            --color-primary-border:   #cce5ff;
+            --color-primary-shadow:   rgba(0, 123, 255, 0.2);
+            --color-primary-shadow-md: rgba(0, 123, 255, 0.3);
+
+            --color-success:          #28a745;
+            --color-success-hover:    #218838;
+            --color-success-light:    #d4edda;
+            --color-success-border:   #c3e6cb;
+            --color-success-shadow:   rgba(40, 167, 69, 0.3);
+
+            --color-danger:           #d9534f;
+            --color-danger-hover:     #c9302c;
+            --color-danger-light:     #ffeaea;
+            --color-danger-border:    #ffc2c2;
+
+            --color-warning:          #ffc107;
+
+            --color-bg-page:          #f4f7f6;
+            --color-bg-card:          #ffffff;
+            --color-bg-input:         #f8f9fa;
+            --color-bg-hover:         #e6f2ff;
+
+            --color-text-main:        #333333;
+            --color-text-secondary:   #555555;
+            --color-text-muted:       #888888;
+            --color-text-light:       #aaaaaa;
+            --color-text-placeholder: #95a5a6;
+
+            --color-border:           #eef2f5;
+            --color-border-medium:    #dce4ec;
+            --color-border-strong:    #bdc3c7;
+
+            --shadow-xs:    0 2px 4px rgba(0,0,0,0.04);
+            --shadow-sm:    0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md:    0 4px 10px rgba(0,0,0,0.1);
+            --shadow-card:  0 8px 20px rgba(0,0,0,0.06);
+            --shadow-modal: 0 10px 30px rgba(0,0,0,0.2);
+            --shadow-primary: 0 4px 10px var(--color-primary-shadow);
+
+            --radius-xs:  4px;
+            --radius-sm:  6px;
+            --radius-md:  8px;
+            --radius-lg:  12px;
+            --radius-xl:  20px;
+            --radius-full: 50%;
+
+            --transition-fast: all 0.2s ease;
+            --transition-base: all 0.3s ease;
+        }
+
+        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--color-bg-page); 
+            color: var(--color-text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- ÜST MENÜ (YÜZEN HEADER) --- */
+        .header {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            background-color: var(--color-bg-card);
+            padding: 14px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06); 
+            margin: 20px auto 15px auto; 
+            width: calc(100% - 40px);
+            max-width: 1400px; 
+            border-radius: var(--radius-lg); 
+            position: sticky;
+            top: 20px; 
+            z-index: 100; 
+            flex-shrink: 0;
+        }
+
+        /* --- LOGO VE ORTA BAŞLIK --- */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer; 
+            transition: transform 0.2s ease;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .header-center-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--color-text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- HEADER BUTONLARI --- */
+        .btn-outline {
+            background-color: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+        .btn-outline:hover {
+            background-color: var(--color-primary);
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-base);
+            box-shadow: var(--shadow-primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .header-icon-btn {
+            background: var(--color-bg-input);
+            color: var(--color-text-secondary);
+            border: 1px solid var(--color-border);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-icon-btn:hover {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+
+        /* --- MENÜ BUTONU --- */
+        .menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            color: var(--color-text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            padding: 5px 10px;
+        }
+
+        .menu-text {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .menu-btn:hover {
+            color: var(--color-primary);
+            transform: scale(1.05);
+        }
+
+        /* --- TEK BÜYÜK İÇERİK ALANI --- */
+        .template-content {
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            margin: 10px auto 20px auto;
+            flex: 1;
+            min-height: 0;
+            background-color: var(--color-bg-card);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.18), 0 5px 15px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .template-inner {
+            flex: 1;
+            min-height: 0;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Template iç alan scrollbar tasarımı */
+        .template-inner::-webkit-scrollbar { width: 6px; }
+        .template-inner::-webkit-scrollbar-thumb { background: var(--color-primary-border); border-radius: 6px; }
+        .template-inner::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+
+        .template-placeholder-icon {
+            font-size: 64px;
+            color: var(--color-primary-border);
+            margin-bottom: 20px;
+        }
+
+        .template-placeholder-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--color-text-main);
+            margin-bottom: 10px;
+        }
+
+        .template-placeholder-desc {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        /* --- REKLAM ALANLARI --- */
+        .ad-space-left, .ad-space-right {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10vw;
+            height: 600px;
+            max-height: 80vh;
+            background-color: #f8f9fa;
+            border: 2px dashed #ced4da;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            color: #adb5bd;
+            font-weight: 800;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        }
+
+        .ad-space-left { left: 20px; }
+        .ad-space-right { right: 20px; }
+
+        @media (max-width: 900px) {
+            .ad-space-left, .ad-space-right {
+                display: none !important;
+            }
+        }
+
+        /* --- YAN MENÜ (SIDEBAR) — ders.html ile birebir aynı --- */
+        .menu-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            z-index: 4000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-base);
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--color-bg-card);
+            box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+            z-index: 4001;
+            transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .side-menu.open {
+            right: 0;
+        }
+        
+        .side-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #eef2f5;
+            background-color: #f8fbff;
+        }
+        .side-menu-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-menu-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--color-text-light);
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+            line-height: 1;
+        }
+        .close-menu-btn:hover {
+            color: var(--color-danger);
+            transform: scale(1.1);
+        }
+        
+        .side-menu-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: var(--transition-fast);
+            background-color: #fcfcfc;
+            border: 1px solid transparent;
+        }
+        .menu-item:hover {
+            background-color: var(--color-primary-lighter);
+            color: var(--color-primary);
+            border-color: var(--color-primary-border);
+            transform: translateX(5px);
+        }
+        .menu-item i {
+            font-size: 16px;
+            color: var(--color-primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Aktif sayfa vurgusu */
+        .menu-item.active-page {
+            background-color: var(--color-primary-lighter);
+            color: var(--color-primary);
+            border-color: var(--color-primary-border);
+        }
+
+        /* --- AÇILIŞ YÜKLEME EKRANI --- */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f4f7f6 0%, #e6f2ff 100%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            animation: floatLoader 2s infinite ease-in-out;
+        }
+
+        .loader-logo {
+            width: 70px;
+            height: 70px;
+            font-size: 30px;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        }
+
+        .loader-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--color-text-main);
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .loader-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #777;
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #cce5ff;
+            border-top: 4px solid var(--color-primary);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+            margin-top: 5px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes floatLoader {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* --- ANA SAYFAYA GEÇİŞ YÜKLEME EKRANI --- */
+        .transition-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #f4f7f6 0%, #e6f2ff 100%);
+            display: none; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .transition-loader.active {
+            display: flex;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AÇILIŞ YÜKLEME EKRANI -->
+    <div id="mainPageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="logo-icon loader-logo">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h2 class="loader-title">Ders Planlayıcı</h2>
+            <div class="spinner"></div>
+            <p class="loader-text">Sayfa yükleniyor...</p>
+        </div>
+    </div>
+
+    <!-- ANA SAYFAYA GEÇİŞ YÜKLEME EKRANI -->
+    <div class="transition-loader" id="transitionLoader">
+        <div class="loader-content">
+            <div class="logo-icon loader-logo">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h2 class="loader-title">Ders Planlayıcı</h2>
+            <div class="spinner"></div>
+            <p class="loader-text">Ana menüye dönülüyor...</p>
+        </div>
+    </div>
+
+    <!-- REKLAM ALANLARI -->
+    <div class="ad-space-left">
+        <i class="fa-solid fa-rectangle-ad" style="font-size: 28px; margin-bottom: 12px; color: #dee2e6;"></i>
+        REKLAM<br>ALANI
+        <span style="font-size: 11px; margin-top: 8px; font-weight: 600; color: #ced4da;">160x600</span>
+    </div>
+
+    <div class="ad-space-right">
+        <i class="fa-solid fa-rectangle-ad" style="font-size: 28px; margin-bottom: 12px; color: #dee2e6;"></i>
+        REKLAM<br>ALANI
+        <span style="font-size: 11px; margin-top: 8px; font-weight: 600; color: #ced4da;">160x600</span>
+    </div>
+
+    <!-- ÜST MENÜ (HEADER) -->
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='ders.html'">
+            <div class="logo-icon">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h1 class="logo-text">Ders Planlayıcı</h1>
+        </div>
+        
+        <div class="header-center-title">
+            <i class="fa-solid fa-swatchbook" style="color:var(--color-primary);"></i> Template
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="headerAuthContainer" style="display: flex; align-items: center; gap: 10px;"></div>
+            
+            <button class="menu-btn" title="Menü" id="openMenuBtn">
+                <span class="menu-text">Menü</span>
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- TEK BÜYÜK İÇERİK ALANI — Orta ve alt kısımların birleştirilmiş hali -->
+    <div class="template-content">
+        <div class="template-inner">
+            <i class="fa-solid fa-swatchbook template-placeholder-icon"></i>
+            <h2 class="template-placeholder-title">Template Alanı</h2>
+            <p class="template-placeholder-desc">
+                Bu alan, ders.html'deki 5 widget'ın (Denemelerim, Ders Programı, Notlarım, Takvim, Konu Çalışması) 
+                yerine geçen tek bir büyük içerik alanıdır. Buraya istediğin içeriği ekleyebilirsin.
+            </p>
+        </div>
+    </div>
+
+    <!-- YAN MENÜ (SIDEBAR) -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2><i class="fa-solid fa-compass"></i> Menü</h2>
+            <button class="close-menu-btn" id="closeMenuBtn">&times;</button>
+        </div>
+        <div class="side-menu-content">
+            <a href="#" id="goHomeBtn" class="menu-item"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="ders.html" class="menu-item"><i class="fa-solid fa-book-open-reader"></i> Ders Çalış</a>
+            <a href="haftalikplanlayici.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Haftalık Planlayıcı</a>
+            <a href="playlistlerim.html" class="menu-item"><i class="fa-brands fa-youtube"></i> Playlistlerim</a>
+            <a href="denemeanaliz.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Deneme Analiz</a>
+            <a href="playlistmerkezi.html" class="menu-item"><i class="fa-brands fa-youtube" style="color:#ff3333;"></i> Playlist Merkezi</a>
+            <a href="profilayarlar.html" class="menu-item" id="sideMenuProfileBtn"><i class="fa-solid fa-user-gear"></i> Profil / Ayarlar</a>
+            <a href="admin.html" class="menu-item" id="sideMenuAdminBtn" style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Paneli</a>
+            <a href="template.html" class="menu-item active-page"><i class="fa-solid fa-swatchbook"></i> Template</a>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <a href="index.html?action=login" class="menu-item" id="sideMenuLoginBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</a>
+                <a href="index.html?action=register" class="menu-item" id="sideMenuRegisterBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> Kaydol</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- AKILLI ÖLÇEKLENDİRME (ders.html ile aynı mantık) ---
+        function applySmartScale() {
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+            const centerElements = document.querySelectorAll('.header, .template-content');
+
+            if (screenW > 900) {
+                const scaleW = (screenW - 380) / 1400;
+                const scaleH = screenH / 900;
+                let scale = Math.min(scaleW, scaleH);
+                if (scale > 1) scale = 1;
+
+                centerElements.forEach(el => {
+                    el.style.zoom = scale;
+                });
+                document.body.style.paddingBottom = Math.round(45 * scale) + 'px';
+            } else {
+                centerElements.forEach(el => {
+                    el.style.zoom = 1;
+                });
+                document.body.style.paddingBottom = '45px';
+            }
+        }
+
+        let _scaleTimer = null;
+        window.addEventListener('resize', function() {
+            clearTimeout(_scaleTimer);
+            _scaleTimer = setTimeout(applySmartScale, 80);
+        });
+        window.addEventListener('DOMContentLoaded', applySmartScale);
+        applySmartScale();
+
+        // --- YAN MENÜ AÇ/KAPA ---
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+
+        document.getElementById('openMenuBtn').addEventListener('click', () => {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('show');
+        });
+
+        document.getElementById('closeMenuBtn').addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+        });
+
+        menuOverlay.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+        });
+
+        // --- ANA SAYFAYA DÖNÜŞ ---
+        document.getElementById('goHomeBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+            sessionStorage.setItem('fromDers', 'true');
+            window.location.href = 'index.html'; 
+        });
+
+    </script>
+
+    <!-- FIREBASE AUTH — Header'da giriş durumunu göstermek için -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8",
+            authDomain: "tripturkey-79e75.firebaseapp.com",
+            projectId: "tripturkey-79e75",
+            storageBucket: "tripturkey-79e75.firebasestorage.app",
+            messagingSenderId: "69790477258",
+            appId: "1:69790477258:web:6ad1f6bc4f9bc437e2bd33"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            const authContainer = document.getElementById('headerAuthContainer');
+
+            if (user) {
+                // Giriş yapılmış — Firestore'dan kullanıcı adını çek
+                let displayName = user.displayName || "Profil";
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data(); // Veriyi bir değişkene aldık
+                        
+                        // Kullanıcı adını ayarlama
+                        if (data.username) {
+                            displayName = data.username;
+                        }
+
+                        // 👇👇👇 YENİ EKLENEN: Admin yetkisi kontrolü 👇👇👇
+                        if (data.isAdmin === true) {
+                            if (document.getElementById('sideMenuAdminBtn')) {
+                                document.getElementById('sideMenuAdminBtn').style.display = '';
+                            }
+                        }
+                        // 👆👆👆 YENİ EKLENEN KISIM BİTTİ 👆👆👆
+                    }
+                } catch (e) { console.error(e); }
+
+                authContainer.innerHTML = `
+                    <span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ${displayName}</span>
+                `;
+
+                // Sidebar giriş/kayıt butonlarını gizle
+                if(document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display = 'none';
+                if(document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display = 'none';
+
+            } else {
+                // Giriş yapılmamış
+                authContainer.innerHTML = `
+                    <button class="btn-outline" onclick="window.location.href='index.html?action=login'">Giriş Yap</button>
+                    <button class="btn-primary" onclick="window.location.href='index.html?action=register'">Kaydol</button>
+                `;
+
+                // Sidebar giriş/kayıt butonlarını göster
+                if(document.getElementById('sideMenuLoginBtn')) document.getElementById('sideMenuLoginBtn').style.display = '';
+                if(document.getElementById('sideMenuRegisterBtn')) document.getElementById('sideMenuRegisterBtn').style.display = '';
+            }
+
+            // Loader'ı kapat
+            setTimeout(() => {
+                document.getElementById('mainPageLoader').classList.add('hidden');
+            }, 300);
+        });
+    </script>
+
+</body>
+</html>

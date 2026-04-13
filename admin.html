@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Planlayıcı | Admin Paneli</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-primary:#007bff;--color-primary-hover:#0056b3;--color-primary-light:#e6f2ff;--color-primary-lighter:#f0f8ff;--color-primary-border:#cce5ff;--color-primary-shadow:rgba(0,123,255,0.2);--color-primary-shadow-md:rgba(0,123,255,0.3);
+            --color-success:#28a745;--color-success-hover:#218838;--color-success-light:#d4edda;--color-success-border:#c3e6cb;--color-success-shadow:rgba(40,167,69,0.3);
+            --color-danger:#d9534f;--color-danger-hover:#c9302c;--color-danger-light:#ffeaea;--color-danger-border:#ffc2c2;
+            --color-warning:#ffc107;
+            --color-bg-page:#f4f7f6;--color-bg-card:#ffffff;--color-bg-input:#f8f9fa;--color-bg-hover:#e6f2ff;
+            --color-text-main:#333;--color-text-secondary:#555;--color-text-muted:#888;--color-text-light:#aaa;--color-text-placeholder:#95a5a6;
+            --color-border:#eef2f5;--color-border-medium:#dce4ec;--color-border-strong:#bdc3c7;
+            --shadow-xs:0 2px 4px rgba(0,0,0,0.04);--shadow-sm:0 2px 4px rgba(0,0,0,0.1);--shadow-md:0 4px 10px rgba(0,0,0,0.1);--shadow-card:0 8px 20px rgba(0,0,0,0.06);--shadow-modal:0 10px 30px rgba(0,0,0,0.2);--shadow-primary:0 4px 10px var(--color-primary-shadow);
+            --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:20px;--radius-full:50%;
+            --transition-fast:all 0.2s ease;--transition-base:all 0.3s ease;
+        }
+
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+        body{background-color:var(--color-bg-page);color:var(--color-text-main);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+        .header{display:flex;justify-content:space-between;align-items:center;background-color:var(--color-bg-card);padding:14px 25px;box-shadow:0 10px 30px rgba(0,0,0,0.12),0 4px 10px rgba(0,0,0,0.06);margin:20px auto 15px auto;width:calc(100% - 40px);max-width:1400px;border-radius:var(--radius-lg);position:sticky;top:20px;z-index:100;flex-shrink:0;}
+        .logo-container{display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform 0.2s;}
+        .logo-container:hover{transform:scale(1.02);}
+        .logo-icon{width:28px;height:28px;background-color:var(--color-primary);color:white;border-radius:var(--radius-full);display:flex;justify-content:center;align-items:center;font-size:13px;box-shadow:var(--shadow-primary);}
+        .logo-text{font-size:16px;font-weight:700;color:var(--color-text-main);letter-spacing:0.5px;}
+        .header-center-title{position:absolute;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:var(--color-text-main);display:flex;align-items:center;gap:8px;}
+        .btn-outline{background-color:transparent;color:var(--color-primary);border:2px solid var(--color-primary);padding:8px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition-base);}
+        .btn-outline:hover{background-color:var(--color-primary);color:#fff;}
+        .btn-primary{background-color:var(--color-primary);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition-base);box-shadow:var(--shadow-primary);}
+        .btn-primary:hover{background-color:var(--color-primary-hover);transform:translateY(-2px);}
+        .menu-btn{display:flex;align-items:center;gap:10px;font-size:24px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;transition:color 0.2s,transform 0.2s;padding:5px 10px;}
+        .menu-text{font-size:16px;font-weight:700;}.menu-btn:hover{color:var(--color-primary);transform:scale(1.05);}
+
+        .template-content{width:calc(100% - 40px);max-width:1400px;margin:10px auto 20px auto;flex:1;min-height:0;background-color:var(--color-bg-card);border-radius:var(--radius-xl);box-shadow:0 15px 40px rgba(0,0,0,0.18),0 5px 15px rgba(0,0,0,0.08);display:flex;flex-direction:column;overflow:hidden;}
+        .template-inner{flex:1;min-height:0;padding:30px;overflow-y:auto;display:flex;flex-direction:column;}
+        .template-inner::-webkit-scrollbar{width:6px;}
+        .template-inner::-webkit-scrollbar-thumb{background:var(--color-primary-border);border-radius:6px;}
+        .template-inner::-webkit-scrollbar-thumb:hover{background:var(--color-primary);}
+
+        .ad-space-left,.ad-space-right{position:fixed;top:50%;transform:translateY(-50%);width:10vw;height:600px;max-height:80vh;background-color:#f8f9fa;border:2px dashed #ced4da;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:50;color:#adb5bd;font-weight:800;font-size:16px;text-align:center;box-shadow:inset 0 0 10px rgba(0,0,0,0.02);}
+        .ad-space-left{left:20px;}.ad-space-right{right:20px;}
+        @media(max-width:900px){.ad-space-left,.ad-space-right{display:none!important;}}
+
+        .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.4);backdrop-filter:blur(3px);z-index:4000;opacity:0;visibility:hidden;transition:var(--transition-base);}
+        .menu-overlay.show{opacity:1;visibility:visible;}
+        .side-menu{position:fixed;top:0;right:-320px;width:300px;height:100vh;background-color:var(--color-bg-card);box-shadow:-5px 0 25px rgba(0,0,0,0.1);z-index:4001;transition:right 0.3s cubic-bezier(0.25,0.8,0.25,1);display:flex;flex-direction:column;}
+        .side-menu.open{right:0;}
+        .side-menu-header{display:flex;justify-content:space-between;align-items:center;padding:20px 25px;border-bottom:1px solid #eef2f5;background-color:#f8fbff;}
+        .side-menu-header h2{font-size:18px;font-weight:800;color:var(--color-primary);display:flex;align-items:center;gap:10px;}
+        .close-menu-btn{background:none;border:none;font-size:28px;color:var(--color-text-light);cursor:pointer;transition:transform 0.2s,color 0.2s;line-height:1;}
+        .close-menu-btn:hover{color:var(--color-danger);transform:scale(1.1);}
+        .side-menu-content{padding:20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+        .menu-item{display:flex;align-items:center;gap:15px;padding:12px 15px;color:var(--color-text-secondary);text-decoration:none;font-size:14px;font-weight:700;border-radius:10px;transition:var(--transition-fast);background-color:#fcfcfc;border:1px solid transparent;}
+        .menu-item:hover{background-color:var(--color-primary-lighter);color:var(--color-primary);border-color:var(--color-primary-border);transform:translateX(5px);}
+        .menu-item i{font-size:16px;color:var(--color-primary);width:20px;text-align:center;}
+        .menu-item.active-page{background-color:var(--color-primary-lighter);color:var(--color-primary);border-color:var(--color-primary-border);}
+
+        .page-loader{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#f4f7f6 0%,#e6f2ff 100%);z-index:9999;display:flex;justify-content:center;align-items:center;transition:opacity 0.5s ease,visibility 0.5s ease;}
+        .page-loader.hidden{opacity:0;visibility:hidden;}
+        .loader-content{display:flex;flex-direction:column;align-items:center;gap:15px;animation:floatLoader 2s infinite ease-in-out;}
+        .loader-logo{width:70px;height:70px;font-size:30px;box-shadow:0 8px 25px rgba(0,123,255,0.3);}
+        .loader-title{font-size:26px;font-weight:800;color:var(--color-text-main);letter-spacing:1px;margin-top:5px;}
+        .loader-text{font-size:13px;font-weight:600;color:#777;margin-top:5px;letter-spacing:0.5px;}
+        .spinner{width:40px;height:40px;border:4px solid #cce5ff;border-top:4px solid var(--color-primary);border-radius:var(--radius-full);animation:spin 1s linear infinite;margin-top:5px;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        @keyframes floatLoader{0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);}}
+
+        /* ============ ADMİN PANELİ ÖZEL STİLLER ============ */
+        .admin-topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px;flex-wrap:wrap;}
+        .admin-stats{display:flex;gap:12px;flex-wrap:wrap;}
+        .stat-card{display:flex;align-items:center;gap:12px;background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px 18px;min-width:140px;transition:var(--transition-fast);}
+        .stat-card:hover{border-color:var(--color-primary-border);background:var(--color-primary-lighter);}
+        .stat-card .stat-icon{width:38px;height:38px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:16px;color:white;flex-shrink:0;}
+        .stat-card .stat-info{display:flex;flex-direction:column;}
+        .stat-card .stat-number{font-size:20px;font-weight:800;color:var(--color-text-main);line-height:1.2;}
+        .stat-card .stat-label{font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+
+        .admin-search-box{position:relative;min-width:280px;}
+        .admin-search-box input{width:100%;padding:12px 16px 12px 42px;border:2px solid var(--color-border-medium);border-radius:var(--radius-md);font-size:14px;font-weight:600;color:var(--color-text-main);background:var(--color-bg-input);transition:var(--transition-fast);outline:none;}
+        .admin-search-box input:focus{border-color:var(--color-primary);background:white;box-shadow:0 0 0 3px var(--color-primary-shadow);}
+        .admin-search-box input::placeholder{color:var(--color-text-placeholder);font-weight:600;}
+        .admin-search-box .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--color-text-muted);font-size:14px;pointer-events:none;}
+        .admin-search-box .clear-search{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-light);font-size:16px;cursor:pointer;display:none;transition:color 0.2s;background:none;border:none;}
+        .admin-search-box .clear-search:hover{color:var(--color-danger);}
+
+        .admin-filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+        .filter-btn{padding:7px 16px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;transition:var(--transition-fast);border:2px solid var(--color-border-medium);background:var(--color-bg-input);color:var(--color-text-secondary);}
+        .filter-btn:hover{border-color:var(--color-primary-border);color:var(--color-primary);background:var(--color-primary-lighter);}
+        .filter-btn.active{border-color:var(--color-primary);background:var(--color-primary);color:white;}
+
+        .admin-table-wrapper{flex:1;overflow-y:auto;border:1px solid var(--color-border);border-radius:var(--radius-md);}
+        .admin-table-wrapper::-webkit-scrollbar{width:6px;}
+        .admin-table-wrapper::-webkit-scrollbar-thumb{background:var(--color-primary-border);border-radius:6px;}
+        .admin-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+        .admin-table thead{position:sticky;top:0;z-index:10;}
+        .admin-table thead th{background:var(--color-bg-input);color:var(--color-text-secondary);font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:0.8px;padding:14px 18px;text-align:left;border-bottom:2px solid var(--color-border-medium);white-space:nowrap;user-select:none;}
+        .admin-table tbody tr{transition:background 0.15s;border-bottom:1px solid var(--color-border);}
+        .admin-table tbody tr:hover{background:var(--color-primary-lighter);}
+        .admin-table tbody tr:last-child{border-bottom:none;}
+        .admin-table td{padding:13px 18px;color:var(--color-text-main);font-weight:600;vertical-align:middle;}
+        .admin-table td.row-num{color:var(--color-text-light);font-size:12px;font-weight:700;width:45px;text-align:center;}
+
+        .user-name-cell{display:flex;align-items:center;gap:10px;}
+        .user-avatar{width:34px;height:34px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0;text-transform:uppercase;}
+        .user-name-text{font-weight:700;color:var(--color-text-main);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+        .email-cell{color:var(--color-text-secondary);font-weight:600;font-size:13px;}
+
+        .role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;}
+        .role-badge.ogrenci{background:var(--color-primary-light);color:var(--color-primary);border:1px solid var(--color-primary-border);}
+        .role-badge.mentor{background:#fff3e0;color:#e67e22;border:1px solid #ffe0b2;}
+        .role-badge.kurumsal{background:#f3e5f5;color:#8e24aa;border:1px solid #e1bee7;}
+
+        .field-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:700;background:var(--color-bg-input);color:var(--color-text-secondary);border:1px solid var(--color-border-medium);}
+        .field-badge i{font-size:10px;}
+        .field-na{color:var(--color-text-light);font-size:12px;font-style:italic;}
+        .date-cell{font-size:12.5px;color:var(--color-text-muted);font-weight:600;}
+
+        .admin-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:800;background:linear-gradient(135deg,#ffd700,#ffaa00);color:#5a3e00;border:1px solid #f0c040;white-space:nowrap;}
+        .admin-badge i{font-size:9px;}
+
+        .admin-toggle-btn{padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;transition:var(--transition-fast);border:1.5px solid;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+        .admin-toggle-btn.make-admin{background:#fff8e1;color:#e67e22;border-color:#ffe0b2;}
+        .admin-toggle-btn.make-admin:hover{background:#e67e22;color:white;border-color:#e67e22;}
+        .admin-toggle-btn.remove-admin{background:var(--color-danger-light);color:var(--color-danger);border-color:var(--color-danger-border);}
+        .admin-toggle-btn.remove-admin:hover{background:var(--color-danger);color:white;border-color:var(--color-danger);}
+
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;}
+        .empty-state i{font-size:48px;color:var(--color-primary-border);}
+        .empty-state h3{font-size:18px;font-weight:800;color:var(--color-text-main);}
+        .empty-state p{font-size:14px;color:var(--color-text-muted);font-weight:600;text-align:center;}
+        .access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:15px;padding:40px;}
+        .access-denied i{font-size:56px;opacity:0.4;}
+        .access-denied h3{font-size:20px;font-weight:800;color:var(--color-text-main);}
+        .access-denied p{font-size:14px;color:var(--color-text-muted);font-weight:600;text-align:center;max-width:450px;line-height:1.6;}
+        .table-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:15px;}
+        .table-loading .mini-spinner{width:32px;height:32px;border:3px solid var(--color-primary-border);border-top:3px solid var(--color-primary);border-radius:50%;animation:spin 0.8s linear infinite;}
+        .table-loading p{font-size:14px;font-weight:700;color:var(--color-text-muted);}
+
+        /* Onay Modalı */
+        .confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:5000;display:none;justify-content:center;align-items:center;}
+        .confirm-overlay.show{display:flex;}
+        .confirm-box{background:white;border-radius:var(--radius-lg);padding:30px;width:90%;max-width:420px;box-shadow:var(--shadow-modal);animation:modalPop 0.25s ease;}
+        @keyframes modalPop{from{opacity:0;transform:scale(0.92) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .confirm-box h3{font-size:18px;font-weight:800;color:var(--color-text-main);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+        .confirm-box p{font-size:14px;color:var(--color-text-secondary);line-height:1.6;font-weight:600;margin-bottom:24px;}
+        .confirm-user-info{background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+        .confirm-user-info .user-avatar{width:38px;height:38px;font-size:15px;}
+        .confirm-user-details{display:flex;flex-direction:column;}
+        .confirm-user-name{font-weight:800;color:var(--color-text-main);font-size:14px;}
+        .confirm-user-email{font-size:12px;color:var(--color-text-muted);font-weight:600;}
+        .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+        .confirm-actions button{padding:10px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition-fast);border:none;}
+        .confirm-cancel{background:var(--color-bg-input);color:var(--color-text-secondary);border:1px solid var(--color-border-medium)!important;}
+        .confirm-cancel:hover{background:var(--color-border);}
+        .confirm-yes-add{background:#e67e22;color:white;box-shadow:0 3px 8px rgba(230,126,34,0.3);}
+        .confirm-yes-add:hover{background:#d35400;}
+        .confirm-yes-remove{background:var(--color-danger);color:white;box-shadow:0 3px 8px rgba(217,83,79,0.3);}
+        .confirm-yes-remove:hover{background:var(--color-danger-hover);}
+
+        /* Toast */
+        .admin-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--color-text-main);color:white;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:700;z-index:6000;box-shadow:0 8px 25px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;transition:transform 0.35s cubic-bezier(0.22,1,0.36,1);white-space:nowrap;}
+        .admin-toast.show{transform:translateX(-50%) translateY(0);}
+        .admin-toast i{font-size:16px;}
+        .admin-toast.success{background:var(--color-success);}
+        .admin-toast.error{background:var(--color-danger);}
+
+        @media(max-width:900px){.admin-topbar{flex-direction:column;align-items:stretch;}.admin-search-box{min-width:unset;}.admin-stats{justify-content:center;}.header-center-title{display:none;}}
+        @media(max-width:650px){.template-inner{padding:16px;}.admin-table td,.admin-table th{padding:10px 12px;}.stat-card{min-width:110px;padding:10px 14px;}}
+    </style>
+</head>
+<body>
+
+    <div id="mainPageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="logo-icon loader-logo" style="background-color: var(--color-text-main);"><i class="fa-solid fa-shield-halved" style="color: #ffd700;"></i></div>
+            <h2 class="loader-title">Admin Paneli</h2>
+            <div class="spinner" style="border-top-color: var(--color-text-main);"></div>
+            <p class="loader-text">Sistem ve yetkiler doğrulanıyor...</p>
+        </div>
+    </div>
+
+    <div class="ad-space-left"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+    <div class="ad-space-right"><i class="fa-solid fa-rectangle-ad" style="font-size:28px;margin-bottom:12px;color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px;margin-top:8px;font-weight:600;color:#ced4da;">160x600</span></div>
+
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='ders.html'">
+            <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+            <h1 class="logo-text">Ders Planlayıcı</h1>
+        </div>
+        <div class="header-center-title"><i class="fa-solid fa-shield-halved" style="color:var(--color-primary);"></i> Admin Paneli</div>
+        <div style="display:flex;align-items:center;gap:15px;">
+            <div id="headerAuthContainer" style="display:flex;align-items:center;gap:10px;"></div>
+            <button class="menu-btn" title="Menü" id="openMenuBtn"><span class="menu-text">Menü</span><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="template-content">
+        <div class="template-inner" id="adminContent"></div>
+    </div>
+
+    <!-- ONAY MODAL -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <h3 id="confirmTitle"><i class="fa-solid fa-shield-halved"></i> Onay</h3>
+            <p id="confirmMessage">Emin misiniz?</p>
+            <div class="confirm-user-info" id="confirmUserInfo">
+                <div class="user-avatar" id="confirmAvatar">?</div>
+                <div class="confirm-user-details">
+                    <span class="confirm-user-name" id="confirmUserName">—</span>
+                    <span class="confirm-user-email" id="confirmUserEmail">—</span>
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button class="confirm-cancel" id="confirmCancelBtn">İptal</button>
+                <button id="confirmYesBtn" class="confirm-yes-add">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-toast" id="adminToast"><i class="fa-solid fa-check-circle"></i><span id="toastText">İşlem başarılı</span></div>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header"><h2><i class="fa-solid fa-compass"></i> Menü</h2><button class="close-menu-btn" id="closeMenuBtn">&times;</button></div>
+        <div class="side-menu-content">
+            <a href="#" id="goHomeBtn" class="menu-item"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="ders.html" class="menu-item"><i class="fa-solid fa-book-open-reader"></i> Ders Çalış</a>
+            <a href="haftalikplanlayici.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Haftalık Planlayıcı</a>
+            <a href="playlistlerim.html" class="menu-item"><i class="fa-brands fa-youtube"></i> Playlistlerim</a>
+            <a href="denemeanaliz.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Deneme Analiz</a>
+            <a href="playlistmerkezi.html" class="menu-item"><i class="fa-brands fa-youtube" style="color:#ff3333;"></i> Playlist Merkezi</a>
+            <a href="profilayarlar.html" class="menu-item" id="sideMenuProfileBtn"><i class="fa-solid fa-user-gear"></i> Profil / Ayarlar</a>
+            <a href="admin.html" class="menu-item active-page" id="sideMenuAdminBtn" style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Paneli</a>
+            <div style="display:flex;gap:8px;width:100%;">
+                <a href="index.html?action=login" class="menu-item" id="sideMenuLoginBtn" style="display:none;flex:1;justify-content:center;padding-left:0;padding-right:0;font-size:14px;color:var(--color-primary);"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</a>
+                <a href="index.html?action=register" class="menu-item" id="sideMenuRegisterBtn" style="display:none;flex:1;justify-content:center;padding-left:0;padding-right:0;font-size:14px;color:var(--color-primary);"><i class="fa-solid fa-user-plus"></i> Kaydol</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function applySmartScale(){const w=window.innerWidth,h=window.innerHeight,els=document.querySelectorAll('.header,.template-content');if(w>900){let s=Math.min((w-380)/1400,h/900);if(s>1)s=1;els.forEach(e=>e.style.zoom=s);document.body.style.paddingBottom=Math.round(45*s)+'px';}else{els.forEach(e=>e.style.zoom=1);document.body.style.paddingBottom='45px';}}
+        let _st=null;window.addEventListener('resize',()=>{clearTimeout(_st);_st=setTimeout(applySmartScale,80);});window.addEventListener('DOMContentLoaded',applySmartScale);applySmartScale();
+
+        const sideMenu=document.getElementById('sideMenu'),menuOverlay=document.getElementById('menuOverlay');
+        document.getElementById('openMenuBtn').addEventListener('click',()=>{sideMenu.classList.add('open');menuOverlay.classList.add('show');});
+        document.getElementById('closeMenuBtn').addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        menuOverlay.addEventListener('click',()=>{sideMenu.classList.remove('open');menuOverlay.classList.remove('show');});
+        document.getElementById('goHomeBtn').addEventListener('click',e=>{e.preventDefault();sideMenu.classList.remove('open');menuOverlay.classList.remove('show');sessionStorage.setItem('fromDers','true');window.location.href='index.html';});
+    </script>
+
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import{getFirestore,doc,getDoc,setDoc,collection,getDocs}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const app=initializeApp({apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8",authDomain:"tripturkey-79e75.firebaseapp.com",projectId:"tripturkey-79e75",storageBucket:"tripturkey-79e75.firebasestorage.app",messagingSenderId:"69790477258",appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33"});
+        const auth=getAuth(app),db=getFirestore(app);
+
+        let allUsers=[],currentFilter='all',currentAdminUid=null;
+
+        const roleLabels={'ogrenci':{text:'Öğrenci',icon:'fa-graduation-cap',class:'ogrenci'},'mentor':{text:'Mentor',icon:'fa-chalkboard-user',class:'mentor'},'kurumsal':{text:'Kurumsal',icon:'fa-building',class:'kurumsal'}};
+        const examLabels={'yks':'YKS','lgs':'LGS'};
+        const fieldLabels={'sayisal':'Sayısal','sozel':'Sözel','esit_agirlik':'Eşit Ağırlık','tyt':'TYT','msu':'MSÜ','belli_degil':'Belli Değil'};
+        const avatarColors=['#007bff','#28a745','#e67e22','#8e24aa','#e74c3c','#00bcd4','#795548','#607d8b','#ff5722','#009688'];
+        function getAvatarColor(n){let h=0;for(let i=0;i<n.length;i++)h=n.charCodeAt(i)+((h<<5)-h);return avatarColors[Math.abs(h)%avatarColors.length];}
+        function formatDate(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return'—';}}
+        function escapeHtml(t){const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};return t.replace(/[&<>"']/g,c=>m[c]);}
+
+        // Toast
+        function showToast(msg,type='success'){
+            const t=document.getElementById('adminToast'),ic=t.querySelector('i');
+            document.getElementById('toastText').textContent=msg;
+            t.className='admin-toast '+type;
+            ic.className=type==='success'?'fa-solid fa-check-circle':'fa-solid fa-circle-xmark';
+            setTimeout(()=>t.classList.add('show'),10);
+            setTimeout(()=>t.classList.remove('show'),3000);
+        }
+
+        // Onay Modalı
+        let confirmCallback=null;
+        document.getElementById('confirmCancelBtn').addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('show'));
+        document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('show');});
+        document.getElementById('confirmYesBtn').addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('show');if(confirmCallback)confirmCallback();});
+
+        function showConfirm(user,isAdding){
+            const initial=(user.username||'?')[0].toUpperCase(),color=getAvatarColor(user.username||'x');
+            document.getElementById('confirmAvatar').style.background=color;
+            document.getElementById('confirmAvatar').textContent=initial;
+            document.getElementById('confirmUserName').textContent=user.username||'—';
+            document.getElementById('confirmUserEmail').textContent=user.email||'—';
+            const yesBtn=document.getElementById('confirmYesBtn');
+            if(isAdding){
+                document.getElementById('confirmTitle').innerHTML='<i class="fa-solid fa-shield-halved" style="color:#e67e22;"></i> Admin Yetkisi Ver';
+                document.getElementById('confirmMessage').textContent='Bu kullanıcıya admin yetkisi vermek istediğinize emin misiniz? Admin yetkisine sahip kullanıcılar bu panele erişebilir ve diğer kullanıcılara yetki verebilir.';
+                yesBtn.className='confirm-yes-add';yesBtn.innerHTML='<i class="fa-solid fa-shield-halved" style="margin-right:4px;"></i> Admin Yap';
+            }else{
+                document.getElementById('confirmTitle').innerHTML='<i class="fa-solid fa-shield-halved" style="color:var(--color-danger);"></i> Admin Yetkisi Kaldır';
+                document.getElementById('confirmMessage').textContent='Bu kullanıcının admin yetkisini kaldırmak istediğinize emin misiniz? Kullanıcı artık admin paneline erişemeyecek.';
+                yesBtn.className='confirm-yes-remove';yesBtn.innerHTML='<i class="fa-solid fa-user-minus" style="margin-right:4px;"></i> Yetkiyi Kaldır';
+            }
+            confirmCallback=async()=>{
+                try{
+                    await setDoc(doc(db,"users",user.id),{isAdmin:isAdding},{merge:true});
+                    const u=allUsers.find(x=>x.id===user.id);if(u)u.isAdmin=isAdding;
+                    applyFilters();
+                    showToast(isAdding?`${user.username} admin yapıldı!`:`${user.username} adminlikten çıkarıldı.`,'success');
+                }catch(err){console.error(err);showToast('İşlem sırasında hata oluştu!','error');}
+            };
+            document.getElementById('confirmOverlay').classList.add('show');
+        }
+
+        // Global toggle handler
+        window._adminToggle=function(userId){
+            const user=allUsers.find(u=>u.id===userId);if(!user)return;
+            if(user.id===currentAdminUid&&user.isAdmin){showToast('Kendinizi adminlikten çıkaramazsınız!','error');return;}
+            showConfirm(user,!user.isAdmin);
+        };
+
+        // Mentor öğrenci listesi dropdown aç/kapa
+        window._toggleStudentList=function(el){
+            const dd=el.querySelector('.admin-student-dropdown');
+            if(!dd)return;
+            // Diğer açıkları kapat
+            document.querySelectorAll('.admin-student-dropdown').forEach(d=>{if(d!==dd)d.style.display='none';});
+            dd.style.display=dd.style.display==='none'?'block':'none';
+        };
+        // Sayfa herhangi yerine tıklanınca dropdown kapat
+        document.addEventListener('click',function(e){
+            if(!e.target.closest('[onclick*="_toggleStudentList"]')){
+                document.querySelectorAll('.admin-student-dropdown').forEach(d=>d.style.display='none');
+            }
+        });
+
+        function buildAdminUI(){
+            return `
+                <div class="admin-topbar">
+                    <div class="admin-stats">
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#007bff,#0056b3);"><i class="fa-solid fa-users"></i></div><div class="stat-info"><span class="stat-number" id="statTotal">0</span><span class="stat-label">Toplam</span></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#007bff,#4da3ff);"><i class="fa-solid fa-graduation-cap"></i></div><div class="stat-info"><span class="stat-number" id="statOgrenci">0</span><span class="stat-label">Öğrenci</span></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#e67e22,#f39c12);"><i class="fa-solid fa-chalkboard-user"></i></div><div class="stat-info"><span class="stat-number" id="statMentor">0</span><span class="stat-label">Mentor</span></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#8e24aa,#ab47bc);"><i class="fa-solid fa-building"></i></div><div class="stat-info"><span class="stat-number" id="statKurumsal">0</span><span class="stat-label">Kurumsal</span></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f1c40f,#f39c12);"><i class="fa-solid fa-crown"></i></div><div class="stat-info"><span class="stat-number" id="statAdmin">0</span><span class="stat-label">Admin</span></div></div>
+                    </div>
+                    <div class="admin-search-box"><i class="fa-solid fa-magnifying-glass search-icon"></i><input type="text" id="searchInput" placeholder="Kullanıcı adı veya e-posta ara..." autocomplete="off"><button class="clear-search" id="clearSearchBtn" title="Aramayı temizle">&times;</button></div>
+                </div>
+                <div class="admin-filters">
+                    <span class="filter-label"><i class="fa-solid fa-filter"></i> Filtre:</span>
+                    <button class="filter-btn active" data-filter="all">Tümü</button>
+                    <button class="filter-btn" data-filter="ogrenci">Öğrenci</button>
+                    <button class="filter-btn" data-filter="mentor">Mentor</button>
+                    <button class="filter-btn" data-filter="kurumsal">Kurumsal</button>
+                </div>
+                <div class="admin-table-wrapper" id="tableWrapper"><div class="table-loading"><div class="mini-spinner"></div><p>Kullanıcılar yükleniyor...</p></div></div>`;
+        }
+
+        function renderTable(users){
+            const wrapper=document.getElementById('tableWrapper');
+            if(users.length===0){const sv=document.getElementById('searchInput')?.value?.trim()||'';wrapper.innerHTML=`<div class="empty-state"><i class="fa-solid fa-${sv?'magnifying-glass':'users-slash'}"></i><h3>${sv?'Sonuç bulunamadı':'Henüz kullanıcı yok'}</h3><p>${sv?'"'+sv+'" ile eşleşen kullanıcı bulunamadı.':'Sisteme kayıtlı kullanıcı bulunmuyor.'}</p></div>`;return;}
+            let rows='';
+            users.forEach((u,i)=>{
+                const role=roleLabels[u.role]||{text:u.role||'—',icon:'fa-user',class:''};
+                const initial=(u.username||'?')[0].toUpperCase(),color=getAvatarColor(u.username||'x');
+                const isAdmin=u.isAdmin===true;
+                let fieldHTML='<span class="field-na">—</span>';
+                if(u.role==='ogrenci'){let p=[];if(u.exam)p.push(examLabels[u.exam]||u.exam.toUpperCase());if(u.field)p.push(fieldLabels[u.field]||u.field);fieldHTML=p.length?`<span class="field-badge"><i class="fa-solid fa-bookmark"></i> ${p.join(' / ')}</span>`:'<span class="field-na">Belirtilmemiş</span>';}
+                const adminBadge=isAdmin?'<span class="admin-badge"><i class="fa-solid fa-crown"></i> Admin</span>':'';
+                const isSelf=u.id===currentAdminUid;
+                let toggleBtn='';
+                if(isAdmin){toggleBtn=isSelf?'<span style="font-size:11px;color:var(--color-text-light);font-weight:700;font-style:italic;">Siz</span>':`<button class="admin-toggle-btn remove-admin" onclick="_adminToggle('${u.id}')"><i class="fa-solid fa-user-minus"></i> Kaldır</button>`;}
+                else{toggleBtn=`<button class="admin-toggle-btn make-admin" onclick="_adminToggle('${u.id}')"><i class="fa-solid fa-shield-halved"></i> Admin Yap</button>`;}
+                // Mentörlük ilişkisi sütunu
+                let mentorshipHTML='<span class="field-na">—</span>';
+                if(u.role==='ogrenci'){
+                    if(u.mentorId){
+                        const mentorUser=allUsers.find(m=>m.id===u.mentorId);
+                        mentorshipHTML=mentorUser?`<span class="field-badge" style="background:#fff3e0;color:#e67e22;border-color:#ffe0b2;"><i class="fa-solid fa-chalkboard-user"></i> ${escapeHtml(mentorUser.username||'—')}</span>`:'<span class="field-na" style="color:#e67e22;">Silinmiş</span>';
+                    }else{
+                        mentorshipHTML='<span class="field-na" style="color:var(--color-text-light);">Atanmadı</span>';
+                    }
+                } else if(u.role==='mentor'){
+                    const students=allUsers.filter(s=>s.mentorId===u.id);
+                    if(students.length>0){
+                        const studentNames=students.map(s=>escapeHtml(s.username||'—')).join(', ');
+                        mentorshipHTML=`<span class="field-badge" style="background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9;cursor:pointer;position:relative;" onclick="window._toggleStudentList(this)" title="Tıkla ve öğrencileri gör"><i class="fa-solid fa-graduation-cap"></i> ${students.length} öğrenci <i class="fa-solid fa-chevron-down" style="font-size:9px;margin-left:2px;"></i><span class="admin-student-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:200px;background:#fff;border:1px solid #c8e6c9;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.12);padding:8px 0;z-index:50;text-align:left;">${students.map(s=>`<span style="display:block;padding:7px 14px;font-size:12px;color:#333;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-user" style="color:#2e7d32;margin-right:6px;font-size:10px;"></i>${escapeHtml(s.username||'—')}</span>`).join('')}</span></span>`;
+                    }else{
+                        mentorshipHTML=`<span class="field-na">0 öğrenci</span>`;
+                    }
+                }
+                rows+=`<tr><td class="row-num">${i+1}</td><td><div class="user-name-cell"><div class="user-avatar" style="background:${color};">${initial}</div><span class="user-name-text">${escapeHtml(u.username||'—')} ${adminBadge}</span></div></td><td class="email-cell">${escapeHtml(u.email||'—')}</td><td><span class="role-badge ${role.class}"><i class="fa-solid ${role.icon}"></i> ${role.text}</span></td><td>${fieldHTML}</td><td style="max-width:200px;">${mentorshipHTML}</td><td class="date-cell">${formatDate(u.createdAt)}</td><td style="text-align:center;">${toggleBtn}</td></tr>`;
+            });
+            wrapper.innerHTML=`<table class="admin-table"><thead><tr><th style="width:45px;text-align:center;">#</th><th>Kullanıcı Adı</th><th>E-posta</th><th>Hesap Türü</th><th>Sınav / Alan</th><th>Mentörlük</th><th>Kayıt Tarihi</th><th style="text-align:center;">Admin</th></tr></thead><tbody>${rows}</tbody></table>`;
+        }
+
+        function applyFilters(){
+            const sv=(document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+            let f=allUsers;
+            if(currentFilter!=='all')f=f.filter(u=>u.role===currentFilter);
+            if(sv)f=f.filter(u=>(u.username||'').toLowerCase().includes(sv)||(u.email||'').toLowerCase().includes(sv));
+            renderTable(f);
+            const cb=document.getElementById('clearSearchBtn');if(cb)cb.style.display=sv?'block':'none';
+        }
+
+        function updateStats(){
+            document.getElementById('statTotal').textContent=allUsers.length;
+            document.getElementById('statOgrenci').textContent=allUsers.filter(u=>u.role==='ogrenci').length;
+            document.getElementById('statMentor').textContent=allUsers.filter(u=>u.role==='mentor').length;
+            document.getElementById('statKurumsal').textContent=allUsers.filter(u=>u.role==='kurumsal').length;
+            document.getElementById('statAdmin').textContent=allUsers.filter(u=>u.isAdmin===true).length;
+        }
+
+        function bindEvents(){
+            document.getElementById('searchInput').addEventListener('input',applyFilters);
+            document.getElementById('clearSearchBtn').addEventListener('click',()=>{document.getElementById('searchInput').value='';applyFilters();});
+            document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;applyFilters();});});
+        }
+
+        async function loadUsers(){
+            try{
+                const snap=await getDocs(collection(db,"users"));allUsers=[];
+                snap.forEach(d=>allUsers.push({id:d.id,...d.data()}));
+                allUsers.sort((a,b)=>{const da=a.createdAt?new Date(a.createdAt):new Date(0);const db2=b.createdAt?new Date(b.createdAt):new Date(0);return db2-da;});
+                updateStats();applyFilters();
+            }catch(err){console.error(err);document.getElementById('tableWrapper').innerHTML=`<div class="empty-state"><i class="fa-solid fa-triangle-exclamation" style="color:var(--color-danger);"></i><h3>Yükleme Hatası</h3><p>Kullanıcılar yüklenirken bir hata oluştu.</p></div>`;}
+        }
+
+        // AUTH STATE — isAdmin kontrolü burada
+        onAuthStateChanged(auth,async(user)=>{
+            const authC=document.getElementById('headerAuthContainer'),adminC=document.getElementById('adminContent');
+            if(user){
+                let displayName=user.displayName||'Profil',isAdmin=false;
+                try{const ud=await getDoc(doc(db,"users",user.uid));if(ud.exists()){const d=ud.data();if(d.username)displayName=d.username;isAdmin=d.isAdmin===true;}}catch(e){console.error(e);}
+                authC.innerHTML=`<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ${displayName}</span>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='none';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='none';
+                if(document.getElementById('sideMenuAdminBtn'))document.getElementById('sideMenuAdminBtn').style.display=isAdmin?'':'none';
+
+                if(isAdmin){
+                    currentAdminUid=user.uid;
+                    adminC.innerHTML=buildAdminUI();bindEvents();await loadUsers();
+                }else{
+                    adminC.innerHTML=`<div class="access-denied"><i class="fa-solid fa-shield-halved" style="color:var(--color-danger);"></i><h3>Yetkisiz Erişim</h3><p>Bu sayfaya yalnızca admin yetkisine sahip kullanıcılar erişebilir. Eğer admin olmanız gerektiğini düşünüyorsanız, lütfen site yöneticisiyle iletişime geçin.</p></div>`;
+                }
+            }else{
+                authC.innerHTML=`<button class="btn-outline" onclick="window.location.href='index.html?action=login'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href='index.html?action=register'">Kaydol</button>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='';
+                adminC.innerHTML=`<div class="access-denied"><i class="fa-solid fa-lock" style="color:var(--color-danger);"></i><h3>Erişim Engellendi</h3><p>Admin paneline erişmek için giriş yapmanız gerekmektedir. Lütfen önce hesabınıza giriş yapın.</p></div>`;
+            }
+            setTimeout(()=>document.getElementById('mainPageLoader').classList.add('hidden'),300);
+        });
+    </script>
+</body>
+</html>

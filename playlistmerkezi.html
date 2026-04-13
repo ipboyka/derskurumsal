@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Planlayıcı | Playlist Merkezi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ============================================================
+           TEMA SİSTEMİ — ders.html ile birebir aynı değişkenler.
+           ============================================================ */
+        :root {
+            --color-primary:          #007bff;
+            --color-primary-hover:    #0056b3;
+            --color-primary-light:    #e6f2ff;
+            --color-primary-lighter:  #f0f8ff;
+            --color-primary-border:   #cce5ff;
+            --color-primary-shadow:   rgba(0, 123, 255, 0.2);
+            --color-primary-shadow-md: rgba(0, 123, 255, 0.3);
+            --color-success:          #28a745;
+            --color-success-hover:    #218838;
+            --color-success-light:    #d4edda;
+            --color-success-border:   #c3e6cb;
+            --color-success-shadow:   rgba(40, 167, 69, 0.3);
+            --color-danger:           #d9534f;
+            --color-danger-hover:     #c9302c;
+            --color-danger-light:     #ffeaea;
+            --color-danger-border:    #ffc2c2;
+            --color-warning:          #ffc107;
+            --color-bg-page:          #f4f7f6;
+            --color-bg-card:          #ffffff;
+            --color-bg-input:         #f8f9fa;
+            --color-bg-hover:         #e6f2ff;
+            --color-text-main:        #333333;
+            --color-text-secondary:   #555555;
+            --color-text-muted:       #888888;
+            --color-text-light:       #aaaaaa;
+            --color-text-placeholder: #95a5a6;
+            --color-border:           #eef2f5;
+            --color-border-medium:    #dce4ec;
+            --color-border-strong:    #bdc3c7;
+            --shadow-xs:    0 2px 4px rgba(0,0,0,0.04);
+            --shadow-sm:    0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md:    0 4px 10px rgba(0,0,0,0.1);
+            --shadow-card:  0 8px 20px rgba(0,0,0,0.06);
+            --shadow-modal: 0 10px 30px rgba(0,0,0,0.2);
+            --shadow-primary: 0 4px 10px var(--color-primary-shadow);
+            --radius-xs:  4px; --radius-sm:  6px; --radius-md:  8px; --radius-lg:  12px; --radius-xl:  20px; --radius-full: 50%;
+            --transition-fast: all 0.2s ease; --transition-base: all 0.3s ease;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--color-bg-page); color: var(--color-text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- ÜST MENÜ (HEADER) --- */
+        .header{display:flex;justify-content:space-between;align-items:center;background-color:var(--color-bg-card);padding:14px 25px;box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06);margin:20px auto 15px auto;width:calc(100% - 40px);max-width:1400px;border-radius:var(--radius-lg);position:sticky;top:20px;z-index:100;flex-shrink:0;}
+        .logo-container{display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform 0.2s ease;}
+        .logo-container:hover{transform:scale(1.02);}
+        .logo-icon{width:28px;height:28px;background-color:var(--color-primary);color:white;border-radius:var(--radius-full);display:flex;justify-content:center;align-items:center;font-size:13px;box-shadow:var(--shadow-primary);}
+        .logo-text{font-size:16px;font-weight:700;color:var(--color-text-main);letter-spacing:0.5px;}
+        /* HEADER İÇİ ÖZEL PLAYLIST PILL TASARIMI (GÖLGELİ) */
+        .header-center-pill { 
+            position:absolute; left:50%; transform:translateX(-50%); 
+            display:flex; align-items:center; gap:15px; 
+            background:#141419; 
+            padding:8px 20px; border-radius:40px; 
+            border:1px solid #2a2a35; 
+            /* Etrafa yayılan hafif kırmızı neon ve alt siyah gölge */
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.15), 0 8px 20px rgba(0, 0, 0, 0.5); 
+        }
+        
+        .pm-day-tabs { display:flex; border-bottom:1px solid #1f1f27; flex-shrink:0; background:#141419; overflow-x:auto; padding:15px 15px 0 15px; gap:6px; }
+        .header-pill-title { 
+            font-size:17px; font-weight:900; color:#fff; 
+            display:flex; align-items:center; gap:10px; 
+            padding-right:15px; border-right:1px solid #444; 
+        }
+        .hw-week-nav { display:flex; align-items:center; gap:10px; }
+        .hw-week-btn { 
+            width:30px; height:30px; border-radius:50%; border:none; 
+            background:#2a2a2a; color:#eee; cursor:pointer; 
+            display:flex; align-items:center; justify-content:center; transition:all 0.2s; 
+        }
+        .hw-week-btn:hover { background:#ff3333; color:#fff; }
+        .hw-week-label { 
+            font-size:14px; font-weight:800; color:#fff; 
+            min-width:140px; text-align:center; letter-spacing:0.3px;
+        }
+
+        /* --- PROGRAM SEÇİCİ (Pill İçi Dropdown) --- */
+        .pill-profile-selector {
+            position: relative;
+            padding-right: 15px;
+            border-right: 1px solid #444;
+        }
+
+        .pill-profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #222230;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 7px 14px;
+            color: #ccc;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .pill-profile-btn:hover {
+            background: #2a2a3a;
+            border-color: #ff3333;
+            color: #fff;
+        }
+
+        .pill-profile-btn.open {
+            background: #2a2a3a;
+            border-color: #ff3333;
+            color: #fff;
+        }
+
+        .pill-profile-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .pill-profile-btn.open .pill-profile-arrow {
+            transform: rotate(180deg);
+        }
+
+        .pill-profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 200px;
+            background: #1a1a24;
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 51, 51, 0.08);
+            z-index: 500;
+            display: none;
+            overflow: hidden;
+            animation: dropdownSlide 0.2s ease;
+        }
+
+        @keyframes dropdownSlide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pill-profile-dropdown.show {
+            display: block;
+        }
+
+        .pill-profile-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid #1f1f27;
+        }
+
+        .pill-profile-option:last-child {
+            border-bottom: none;
+        }
+
+        .pill-profile-option:hover {
+            background: #222230;
+            color: #fff;
+        }
+
+        .pill-profile-option.selected {
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff5555;
+            font-weight: 800;
+        }
+
+        .pill-profile-option.selected::after {
+            content: '✓';
+            margin-left: auto;
+            font-size: 14px;
+            font-weight: 900;
+            color: #ff3333;
+        }
+
+        /* GÜN SEKMELERİ DÜZENLEME (Üstten Boşluk ve Okunabilirlik) */
+        .pm-day-nav {
+            display:flex; gap:12px; padding:20px 25px 15px 25px; /* Üstten boşluk artırıldı (20px) */
+            border-bottom:1px solid #2a2a2a;
+        }
+        .pm-day-btn {
+            padding:12px 20px; border-radius:12px; border:1px solid #333;
+            background:#252525; color:#aaa; font-size:14px; font-weight:700;
+            cursor:pointer; transition:all 0.2s ease;
+            letter-spacing:0.5px; text-transform:uppercase; /* Daha profesyonel ve okunaklı */
+        }
+        .pm-day-btn:hover { background:#333; color:#fff; border-color:#444; }
+        .pm-day-btn.active { 
+            background:#ff3333; color:#fff; border-color:#ff3333; 
+            box-shadow:0 4px 12px rgba(255, 51, 51, 0.2); 
+        }
+        .btn-outline { background-color:transparent; color:var(--color-primary); border:2px solid var(--color-primary); padding:8px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition-base); }
+        .btn-outline:hover { background-color:var(--color-primary); color:#ffffff; }
+        .btn-primary { background-color:var(--color-primary); color:#ffffff; border:none; padding:8px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition-base); box-shadow:var(--shadow-primary); }
+        .btn-primary:hover { background-color:var(--color-primary-hover); transform:translateY(-2px); }
+        .menu-btn { display:flex; align-items:center; gap:10px; font-size:24px; color:var(--color-text-secondary); background:none; border:none; cursor:pointer; transition:color 0.2s ease,transform 0.2s ease; padding:5px 10px; }
+        .menu-text { font-size:16px; font-weight:700; }
+        .menu-btn:hover { color:var(--color-primary); transform:scale(1.05); }
+
+        /* --- TEK BÜYÜK İÇERİK ALANI (BALONCUK) --- */
+        .template-content { width:calc(100% - 40px); max-width:1400px; margin:10px auto 20px auto; flex:1; min-height:0; background-color:var(--color-bg-card); border-radius:var(--radius-xl); box-shadow:0 15px 40px rgba(0,0,0,0.18), 0 5px 15px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden; }
+
+        /* --- REKLAM ALANLARI --- */
+        .ad-space-left,.ad-space-right { position:fixed; top:50%; transform:translateY(-50%); width:10vw; height:600px; max-height:80vh; background-color:#f8f9fa; border:2px dashed #ced4da; border-radius:12px; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:50; color:#adb5bd; font-weight:800; font-size:16px; text-align:center; box-shadow:inset 0 0 10px rgba(0,0,0,0.02); }
+        .ad-space-left { left:20px; } .ad-space-right { right:20px; }
+        @media (max-width:900px) { .ad-space-left,.ad-space-right { display:none !important; } }
+
+        /* --- YAN MENÜ (SIDEBAR) --- */
+        .menu-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); backdrop-filter:blur(3px); z-index:4000; opacity:0; visibility:hidden; transition:var(--transition-base); }
+        .menu-overlay.show { opacity:1; visibility:visible; }
+        .side-menu { position:fixed; top:0; right:-320px; width:300px; height:100vh; background-color:var(--color-bg-card); box-shadow:-5px 0 25px rgba(0,0,0,0.1); z-index:4001; transition:right 0.3s cubic-bezier(0.25,0.8,0.25,1); display:flex; flex-direction:column; }
+        .side-menu.open { right:0; }
+        .side-menu-header { display:flex; justify-content:space-between; align-items:center; padding:20px 25px; border-bottom:1px solid #eef2f5; background-color:#f8fbff; }
+        .side-menu-header h2 { font-size:18px; font-weight:800; color:var(--color-primary); display:flex; align-items:center; gap:10px; }
+        .close-menu-btn { background:none; border:none; font-size:28px; color:var(--color-text-light); cursor:pointer; transition:transform 0.2s,color 0.2s; line-height:1; }
+        .close-menu-btn:hover { color:var(--color-danger); transform:scale(1.1); }
+        .side-menu-content { padding:20px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+        .menu-item { display:flex; align-items:center; gap:15px; padding:12px 15px; color:var(--color-text-secondary); text-decoration:none; font-size:14px; font-weight:700; border-radius:10px; transition:var(--transition-fast); background-color:#fcfcfc; border:1px solid transparent; }
+        .menu-item:hover { background-color:var(--color-primary-lighter); color:var(--color-primary); border-color:var(--color-primary-border); transform:translateX(5px); }
+        .menu-item i { font-size:16px; color:var(--color-primary); width:20px; text-align:center; }
+        .menu-item.active-page { background-color:var(--color-primary-lighter); color:var(--color-primary); border-color:var(--color-primary-border); }
+
+        /* --- LOADER --- */
+        .page-loader { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#f4f7f6 0%,#e6f2ff 100%); z-index:9999; display:flex; justify-content:center; align-items:center; transition:opacity 0.5s ease,visibility 0.5s ease; }
+        .page-loader.hidden { opacity:0; visibility:hidden; }
+        .loader-content { display:flex; flex-direction:column; align-items:center; gap:15px; animation:floatLoader 2s infinite ease-in-out; }
+        .loader-logo { width:70px; height:70px; font-size:30px; box-shadow:0 8px 25px rgba(0,123,255,0.3); }
+        .loader-title { font-size:26px; font-weight:800; color:var(--color-text-main); letter-spacing:1px; margin-top:5px; }
+        .loader-text { font-size:13px; font-weight:600; color:#777; margin-top:5px; letter-spacing:0.5px; }
+        .spinner { width:40px; height:40px; border:4px solid #cce5ff; border-top:4px solid var(--color-primary); border-radius:var(--radius-full); animation:spin 1s linear infinite; margin-top:5px; }
+        @keyframes spin { 100%{transform:rotate(360deg);} }
+        @keyframes floatLoader { 0%{transform:translateY(0);} 50%{transform:translateY(-10px);} 100%{transform:translateY(0);} }
+
+        /* ============================================================
+           PLAYLİST MERKEZİ İÇ STİLLERİ
+           Baloncuk içinde yaşayan koyu temalı playlist arayüzü.
+           ============================================================ */
+        .pm-wrapper { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#0f0f11; border-radius:0 0 var(--radius-xl) var(--radius-xl); }
+        .pm-wrapper::-webkit-scrollbar { width:8px; height:8px; }
+        .pm-wrapper::-webkit-scrollbar-track { background:#141419; border-radius:10px; }
+        .pm-wrapper::-webkit-scrollbar-thumb { background:#2a2a35; border-radius:10px; border:2px solid #141419; }
+        .pm-wrapper::-webkit-scrollbar-thumb:hover { background:#ff3333; }
+
+        .pm-header { display:flex; justify-content:space-between; align-items:center; padding:14px 25px; border-bottom:1px solid #1f1f27; flex-shrink:0; background:linear-gradient(180deg,#181820 0%,#0f0f11 100%); border-radius:var(--radius-xl) var(--radius-xl) 0 0; }
+        .pm-logo { display:flex; align-items:center; gap:10px; background:rgba(255,0,0,0.1); padding:8px 16px; border-radius:12px; border:1px solid rgba(255,0,0,0.2); }
+        .pm-logo i { color:#ff3333; font-size:20px; filter:drop-shadow(0 0 8px rgba(255,0,0,0.5)); }
+        .pm-logo h3 { margin:0; font-size:16px; color:#ffffff; font-weight:800; letter-spacing:0.5px; }
+        .pm-week-nav { display:flex; align-items:center; gap:12px; background:#1a1a24; padding:6px; border-radius:30px; border:1px solid #2a2a35; }
+        .pm-week-btn { width:34px; height:34px; border-radius:50%; border:none; background:#252532; color:#a0a0b0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+        .pm-week-btn:hover { background:#303040; color:#fff; }
+        .pm-week-label { font-size:14px; font-weight:700; color:#e0e0e0; min-width:160px; text-align:center; letter-spacing:0.5px; }
+
+
+        .pm-main { flex:1; display:flex; overflow:hidden; }
+        .pm-left { flex:1; display:flex; flex-direction:column; min-width:0; background:#0f0f11; position:relative; }
+        .pm-playlist-pane { flex:1; overflow-y:auto; padding:25px; }
+        .pm-playlist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:25px; }
+        .pm-player-pane { display:none; flex:1; flex-direction:column; background:#000; }
+        .pm-player-wrap { flex:1; position:relative; background:#000; min-height:0; display:flex; justify-content:center; align-items:center; }
+        .pm-player-shadow { width:100%; height:100%; position:absolute; box-shadow:inset 0 0 150px rgba(0,0,0,0.9); pointer-events:none; }
+        .pm-iframe { flex:1; border:none; width:100%; height:100%; display:block; z-index:1; }
+        .pm-now-playing { padding:15px 25px; background:linear-gradient(90deg,#111 0%,#1a1a1a 100%); color:#fff; font-size:16px; font-weight:700; display:flex; align-items:center; gap:12px; flex-shrink:0; border-top:1px solid #222; }
+        .pm-now-icon { background:rgba(255,0,0,0.15); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .pm-now-icon i { color:#ff3333; font-size:14px; margin-left:3px; }
+        .pm-now-title { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 2px 4px rgba(0,0,0,0.5); }
+
+        .pm-right { display:none; width:360px; flex-shrink:0; border-left:1px solid #1f1f27; flex-direction:column; background:#141419; }
+        .pm-right-header { padding:15px 20px; border-bottom:1px solid #1f1f27; display:flex; align-items:center; gap:8px; flex-shrink:0; background:#181820; }
+        .pm-back-btn { border:1px solid #333; background:#222; border-radius:10px; cursor:pointer; color:#ccc; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; padding:8px 14px; transition:0.2s; }
+        .pm-back-btn:hover { background:#333; color:#fff; }
+        .pm-video-title { padding:16px 20px; font-size:14px; font-weight:800; color:#fff; border-bottom:1px solid #1f1f27; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; background:#1a1a24; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+        .pm-video-list { flex:1; overflow-y:auto; padding:10px 0; }
+        .pm-complete-bar { padding:20px; border-top:1px solid #1f1f27; flex-shrink:0; background:#181820; box-shadow:0 -4px 15px rgba(0,0,0,0.3); }
+        .pm-complete-btn { width:100%; padding:14px; border:none; background:linear-gradient(135deg,#1f8a3d 0%,#155724 100%); color:white; border-radius:12px; font-size:14px; font-weight:800; cursor:not-allowed; opacity:0.3; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.3s; box-shadow:0 4px 15px rgba(31,138,61,0.2); }
+
+        .pm-video-list::-webkit-scrollbar { width:6px; }
+        .pm-video-list::-webkit-scrollbar-thumb { background:#2a2a35; border-radius:6px; }
+        .pm-video-list::-webkit-scrollbar-thumb:hover { background:#ff3333; }
+        .pm-playlist-pane::-webkit-scrollbar { width:6px; }
+        .pm-playlist-pane::-webkit-scrollbar-thumb { background:#2a2a35; border-radius:6px; }
+        .pm-playlist-pane::-webkit-scrollbar-thumb:hover { background:#ff3333; }
+    </style>
+</head>
+<body>
+
+    <!-- AÇILIŞ YÜKLEME EKRANI -->
+    <div id="mainPageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="logo-icon loader-logo" style="background-color: #ff3333; box-shadow: 0 8px 25px rgba(255, 51, 51, 0.3);">
+                <i class="fa-brands fa-youtube"></i>
+            </div>
+            <h2 class="loader-title">Playlist Merkezi</h2>
+            <div class="spinner"></div>
+            <p class="loader-text">Videolarınız yükleniyor...</p>
+        </div>
+    </div>
+
+    <!-- REKLAM ALANLARI -->
+    <div class="ad-space-left"><i class="fa-solid fa-rectangle-ad" style="font-size:28px; margin-bottom:12px; color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px; margin-top:8px; font-weight:600; color:#ced4da;">160x600</span></div>
+    <div class="ad-space-right"><i class="fa-solid fa-rectangle-ad" style="font-size:28px; margin-bottom:12px; color:#dee2e6;"></i>REKLAM<br>ALANI<span style="font-size:11px; margin-top:8px; font-weight:600; color:#ced4da;">160x600</span></div>
+
+    <!-- ÜST MENÜ (HEADER) -->
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='ders.html'">
+            <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+            <h1 class="logo-text">Ders Planlayıcı</h1>
+        </div>
+        
+        <div class="header-center-pill">
+            <!-- PROGRAM SEÇİCİ -->
+            <div class="pill-profile-selector" id="pillProfileSelector">
+                <button class="pill-profile-btn" id="pillProfileBtn">
+                    <i class="fa-solid fa-layer-group" style="font-size:12px;"></i>
+                    <span id="pillProfileText">Ana Program</span>
+                    <i class="fa-solid fa-chevron-down pill-profile-arrow" id="pillProfileArrow" style="font-size:9px;"></i>
+                </button>
+                <div class="pill-profile-dropdown" id="pillProfileDropdown">
+                    <div class="pill-profile-option selected" data-value="main_profile">
+                        <i class="fa-solid fa-star" style="color:#ffc107;font-size:11px;"></i> Ana Program
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-pill-title">
+                <i class="fa-brands fa-youtube" style="color:#ff3333; font-size:20px;"></i> Playlist Merkezi
+            </div>
+            <div class="hw-week-nav">
+                <button class="hw-week-btn" id="vwPrevWeek"><i class="fa-solid fa-chevron-left" style="font-size:11px;"></i></button>
+                <span class="hw-week-label" id="vwWeekLabel"></span>
+                <button class="hw-week-btn" id="vwNextWeek"><i class="fa-solid fa-chevron-right" style="font-size:11px;"></i></button>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div id="headerAuthContainer" style="display:flex; align-items:center; gap:10px;"></div>
+            <button class="menu-btn" title="Menü" id="openMenuBtn">
+                <span class="menu-text">Menü</span>
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK BALONCUĞU -->
+    <div class="template-content">
+        <div class="pm-wrapper">
+
+            <!-- GÜN TABLARI -->
+            <div class="pm-day-tabs" id="vwDayTabs"></div>
+
+            <!-- ANA İÇERİK -->
+            <div class="pm-main">
+                <div class="pm-left" id="vwLeftPane">
+                    <div class="pm-playlist-pane" id="vwPlaylistPane">
+                        <div class="pm-playlist-grid" id="vwPlaylistGrid"></div>
+                    </div>
+                    <div class="pm-player-pane" id="vwPlayerPane">
+                        <div class="pm-player-wrap" id="vwPlayerWrapper">
+                            <div class="pm-player-shadow"></div>
+                            <iframe id="vwIframe" src="" class="pm-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                        </div>
+                        <div class="pm-now-playing" id="vwNowPlaying">
+                            <div class="pm-now-icon"><i class="fa-solid fa-play"></i></div>
+                            <span class="pm-now-title" id="vwNowTitle"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pm-right" id="vwRightPane">
+                    <div class="pm-right-header"><button class="pm-back-btn" id="vwBackBtn"><i class="fa-solid fa-arrow-left"></i> Listelere Dön</button></div>
+                    <div class="pm-video-title" id="vwVideoListTitle"></div>
+                    <div class="pm-video-list" id="vwVideoList"></div>
+                    <div class="pm-complete-bar"><button class="pm-complete-btn" id="vwCompleteTaskBtn" disabled><i class="fa-solid fa-circle-check" style="font-size:18px;"></i> Görevi Tamamla</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÖZEL ONAY MODALI -->
+    <div id="customConfirmOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+        <div id="customConfirmBox" style="background:#141419; width:400px; max-width:90%; border-radius:16px; border:1px solid #2a2a35; box-shadow:0 20px 40px rgba(0,0,0,0.6); padding:30px; text-align:center; transform:scale(0.9); transition:all 0.2s ease-out; opacity:0;">
+            <div style="width:60px;height:60px;background:rgba(255,51,51,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px auto;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#ff3333;font-size:24px;"></i>
+            </div>
+            <h3 style="color:#fff;font-size:18px;margin:0 0 12px 0;font-weight:800;">Dikkat</h3>
+            <p id="customConfirmMessage" style="color:#a0a0b0; font-size:14px; line-height:1.6; margin:0 0 25px 0; font-weight:600;"></p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button id="customConfirmCancelBtn" style="flex:1; padding:12px; border-radius:10px; border:1px solid #333; background:#222; color:#ccc; font-weight:700; cursor:pointer; transition:0.2s; font-size:14px;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='#222'; this.style.color='#ccc';">İptal</button>
+                <button id="customConfirmOkBtn" style="flex:1; padding:12px; border-radius:10px; border:none; background:linear-gradient(135deg, #ff4444 0%, #cc0000 100%); color:white; font-weight:700; cursor:pointer; transition:0.2s; box-shadow:0 4px 15px rgba(255,51,51,0.3); font-size:14px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255,51,51,0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,51,51,0.3)';">Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YAN MENÜ (SIDEBAR) -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2><i class="fa-solid fa-compass"></i> Menü</h2>
+            <button class="close-menu-btn" id="closeMenuBtn">&times;</button>
+        </div>
+        <div class="side-menu-content">
+            <a href="#" id="goHomeBtn" class="menu-item"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="ders.html" class="menu-item"><i class="fa-solid fa-book-open-reader"></i> Ders Çalış</a>
+            <a href="haftalikplanlayici.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Haftalık Planlayıcı</a>
+            <a href="playlistlerim.html" class="menu-item"><i class="fa-brands fa-youtube"></i> Playlistlerim</a>
+            <a href="denemeanaliz.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Deneme Analiz</a>
+            <a href="playlistmerkezi.html" class="menu-item active-page"><i class="fa-brands fa-youtube" style="color:#ff3333;"></i> Playlist Merkezi</a>
+            <a href="profilayarlar.html" class="menu-item" id="sideMenuProfileBtn"><i class="fa-solid fa-user-gear"></i> Profil / Ayarlar</a>
+            <a href="admin.html" class="menu-item" id="sideMenuAdminBtn" style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Paneli</a>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <a href="index.html?action=login" class="menu-item" id="sideMenuLoginBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</a>
+                <a href="index.html?action=register" class="menu-item" id="sideMenuRegisterBtn" style="display: none; flex: 1; justify-content: center; padding-left: 0; padding-right: 0; font-size: 14px; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> Kaydol</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- AKILLI ÖLÇEKLENDİRME ---
+        function applySmartScale() {
+            const screenW = window.innerWidth, screenH = window.innerHeight;
+            const centerElements = document.querySelectorAll('.header, .template-content');
+            if (screenW > 900) {
+                const scaleW = (screenW - 380) / 1400, scaleH = screenH / 900;
+                let scale = Math.min(scaleW, scaleH); if (scale > 1) scale = 1;
+                centerElements.forEach(el => { el.style.zoom = scale; });
+                document.body.style.paddingBottom = Math.round(45 * scale) + 'px';
+            } else {
+                centerElements.forEach(el => { el.style.zoom = 1; });
+                document.body.style.paddingBottom = '45px';
+            }
+        }
+        let _scaleTimer = null;
+        window.addEventListener('resize', () => { clearTimeout(_scaleTimer); _scaleTimer = setTimeout(applySmartScale, 80); });
+        window.addEventListener('DOMContentLoaded', applySmartScale);
+        applySmartScale();
+
+        // --- YAN MENÜ ---
+        const sideMenu = document.getElementById('sideMenu'), menuOverlay = document.getElementById('menuOverlay');
+        document.getElementById('openMenuBtn').addEventListener('click', () => { sideMenu.classList.add('open'); menuOverlay.classList.add('show'); });
+        document.getElementById('closeMenuBtn').addEventListener('click', () => { sideMenu.classList.remove('open'); menuOverlay.classList.remove('show'); });
+        menuOverlay.addEventListener('click', () => { sideMenu.classList.remove('open'); menuOverlay.classList.remove('show'); });
+        document.getElementById('goHomeBtn').addEventListener('click', function(e) {
+            e.preventDefault(); sideMenu.classList.remove('open'); menuOverlay.classList.remove('show');
+            sessionStorage.setItem('fromDers', 'true'); window.location.href = 'index.html';
+        });
+
+        // --- TEMA ---
+
+        // --- PROGRAM SEÇİCİ (DROPDOWN) ---
+        (function initProfileSelector() {
+            const btn = document.getElementById('pillProfileBtn');
+            const dropdown = document.getElementById('pillProfileDropdown');
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = dropdown.classList.contains('show');
+                dropdown.classList.toggle('show');
+                btn.classList.toggle('open');
+            });
+
+            window.addEventListener('click', (e) => {
+                if (!document.getElementById('pillProfileSelector').contains(e.target)) {
+                    dropdown.classList.remove('show');
+                    btn.classList.remove('open');
+                }
+            });
+        })();
+
+        // Profil değiştiğinde sayfayı yeniden yükle (URL parametresi ile)
+        window.selectPlannerProfile = function(profileId) {
+            const params = new URLSearchParams(window.location.search);
+            if (profileId === 'main_profile') {
+                params.delete('profile');
+            } else {
+                params.set('profile', profileId);
+            }
+            // date parametresini koru
+            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            window.location.href = newUrl;
+        };
+    </script>
+
+    <!-- PLAYLİST MERKEZİ UYGULAMA KODU + FİREBASE -->
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import{getFirestore,doc,setDoc,getDoc,collection,getDocs}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        const app=initializeApp({apiKey:"AIzaSyAKpk8odLUEZTJh_4qvyrcu59t4eoNNIe8",authDomain:"tripturkey-79e75.firebaseapp.com",projectId:"tripturkey-79e75",storageBucket:"tripturkey-79e75.firebasestorage.app",messagingSenderId:"69790477258",appId:"1:69790477258:web:6ad1f6bc4f9bc437e2bd33"});
+        const auth=getAuth(app),db=getFirestore(app);
+        let currentUserUid=null, savedPlaylists=[], userTasks={};
+
+        const TR_DAYS=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+        const TR_MONTHS=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+        let vwWeek=null, vwDay=null, vwTask=null, vwVideos=null, vwTitle='', vwIdx=0, vwWatched=new Set();
+
+        function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+        function getMonday(d){const x=new Date(d);const day=x.getDay();x.setDate(x.getDate()-day+(day===0?-6:1));x.setHours(0,0,0,0);return x;}
+
+        function profileId(){const params=new URLSearchParams(window.location.search);return params.get('profile')||'main_profile';}
+        function tasksWithVideos(dk){return (userTasks[dk]||[]).filter(t=>(t.profileId||'main_profile')===profileId()&&t.taskVideos&&t.taskVideos.length>0);}
+        function getVideoId(v){if(v.videoId)return v.videoId;if(v.thumb){const m=v.thumb.match(/\/vi\/([A-Za-z0-9_-]{11})\//);if(m)return m[1];}return null;}
+
+        function updateWeekLabel(){const end=new Date(vwWeek);end.setDate(end.getDate()+6);document.getElementById('vwWeekLabel').textContent=`${vwWeek.getDate()} ${TR_MONTHS[vwWeek.getMonth()]} – ${end.getDate()} ${TR_MONTHS[end.getMonth()]}`;}
+
+        function renderDayTabs(){
+            const bar=document.getElementById('vwDayTabs');bar.innerHTML='';
+            for(let i=0;i<7;i++){
+                const d=new Date(vwWeek);d.setDate(d.getDate()+i);const dk=dateKey(d);
+                const count=tasksWithVideos(dk).length;const isSelected=dk===vwDay;
+                const tab=document.createElement('button');
+                // padding artırıldı, border-radius eklendi ki üst kısım daha yumuşak dursun
+                tab.style.cssText=`flex:1;min-width:110px;padding:16px 8px 14px 8px;border:none;border-radius:12px 12px 0 0;border-bottom:3px solid ${isSelected?'#ff3333':'transparent'};background:${isSelected?'#1a1a24':'transparent'};cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.2s;`;
+                tab.onmouseover=()=>{if(!isSelected)tab.style.background='#1a1a24';};
+                tab.onmouseout=()=>{if(!isSelected)tab.style.background='transparent';};
+                let badgeBg=isSelected?(count>0?'#ff3333':'#2a2a35'):(count>0?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.03)');
+                let badgeColor=isSelected?(count>0?'#fff':'#888'):(count>0?'#aaa':'#555');
+                let badgeShadow=(isSelected&&count>0)?'0 0 10px rgba(255,51,51,0.5)':'none';
+                
+                // span tasarımları: text-transform:uppercase eklendi, font boyutları ve boşluklar optimize edildi
+                tab.innerHTML=`<span style="font-size:14px;font-weight:900;text-transform:uppercase;color:${isSelected?'#fff':'#888'};letter-spacing:1px;">${TR_DAYS[i]}</span><span style="font-size:12px;color:${isSelected?'#aaa':'#666'};font-weight:700;">${d.getDate()} ${TR_MONTHS[d.getMonth()]}</span><span style="font-size:11px;font-weight:800;background:${badgeBg};color:${badgeColor};border-radius:12px;padding:3px 10px;box-shadow:${badgeShadow};transition:0.2s;">${count} Playlist</span>`;
+                
+                tab.onclick=()=>{if(vwDay===dk){vwDay=null;const iframe=document.getElementById('vwIframe');if(iframe)iframe.src='';showPlaylistPane();renderDayTabs();renderPlaylistGrid();}else{selectDay(dk);}};
+                bar.appendChild(tab);
+            }
+        }
+
+        function selectDay(dk){vwDay=dk;vwTask=null;vwVideos=null;const iframe=document.getElementById('vwIframe');if(iframe)iframe.src='';showPlaylistPane();renderDayTabs();renderPlaylistGrid();}
+        function showPlaylistPane(){document.getElementById('vwPlaylistPane').style.display='';document.getElementById('vwPlayerPane').style.display='none';document.getElementById('vwRightPane').style.display='none';}
+        function showPlayerPane(){document.getElementById('vwPlaylistPane').style.display='none';const pp=document.getElementById('vwPlayerPane');pp.style.display='flex';pp.style.flexDirection='column';document.getElementById('vwRightPane').style.display='flex';}
+
+        function renderPlaylistGrid(){
+            const grid=document.getElementById('vwPlaylistGrid');grid.innerHTML='';
+            if(!vwDay){
+                grid.style.display='grid';grid.style.gridTemplateColumns='repeat(7, 1fr)';grid.style.gap='15px';grid.style.alignItems='start';grid.style.minWidth='900px';
+                for(let i=0;i<7;i++){
+                    const d=new Date(vwWeek);d.setDate(d.getDate()+i);const dk=dateKey(d);const tasks=tasksWithVideos(dk);
+                    const col=document.createElement('div');col.style.cssText='display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,0.02);padding:12px;border-radius:16px;border:1px solid #1f1f27;';
+                    if(tasks.length===0){col.innerHTML=`<div style="text-align:center;color:#444;font-size:12px;font-weight:600;padding:20px 0;"><i class="fa-solid fa-mug-hot" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>Boş</div>`;}
+                    else{tasks.forEach(task=>{
+                        const isCompleted=task.isCompleted===true;const block=document.createElement('div');
+                        block.style.cssText=`background:${isCompleted?'#101512':'#1a1a24'};border:1px solid ${isCompleted?'#1f8a3d':'#2a2a35'};padding:8px;border-radius:12px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 10px rgba(0,0,0,0.2);display:flex;flex-direction:column;`;
+                        block.onmouseover=()=>{block.style.borderColor=isCompleted?'#28a745':'#ff3333';block.style.transform='translateY(-3px)';block.style.boxShadow='0 6px 15px rgba(0,0,0,0.4)';};
+                        block.onmouseout=()=>{block.style.borderColor=isCompleted?'#1f8a3d':'#2a2a35';block.style.transform='translateY(0)';block.style.boxShadow='0 4px 10px rgba(0,0,0,0.2)';};
+                        block.onclick=()=>selectDay(dk);
+                        const thumb=(task.taskVideos[0]?.thumb||'').replace('default.jpg','hqdefault.jpg');
+                        block.innerHTML=`<div style="position:relative;margin-bottom:8px;border-radius:6px;overflow:hidden;"><img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;${isCompleted?'filter:brightness(0.4) grayscale(0.5)':'filter:brightness(0.85)'};transition:0.3s;">${isCompleted?`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-circle-check" style="color:#28a745;font-size:24px;filter:drop-shadow(0 0 5px rgba(0,0,0,0.8));"></i></div>`:''}</div><div style="font-size:12px;font-weight:800;color:${isCompleted?'#888':'#ccc'};line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.5);">${task.desc||task.subject||'Görev'}</div><div style="font-size:10px;color:${isCompleted?'#1f8a3d':'#a0a0b0'};margin-top:6px;font-weight:700;display:flex;align-items:center;gap:4px;"><i class="fa-solid fa-film" style="color:${isCompleted?'#1f8a3d':'#ff3333'};"></i> ${task.taskVideos.length} video</div>`;
+                        col.appendChild(block);
+                    });}
+                    grid.appendChild(col);
+                }
+                return;
+            }
+            grid.style.display='grid';grid.style.gridTemplateColumns='repeat(auto-fill,minmax(260px,1fr))';grid.style.gap='25px';grid.style.alignItems='stretch';grid.style.minWidth='auto';
+            const tasks=tasksWithVideos(vwDay);
+            if(!tasks.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:#555;font-size:15px;font-weight:600;"><i class="fa-solid fa-film" style="font-size:40px;margin-bottom:15px;display:block;opacity:0.5;"></i>Bu günde video içeren görev yok.</div>';return;}
+            tasks.forEach(task=>{
+                const thumb=(task.taskVideos[0]?.thumb||'').replace('default.jpg','hqdefault.jpg');const card=document.createElement('div');const isCompleted=task.isCompleted===true;
+                card.style.cssText=`border:1px solid ${isCompleted?'#1f8a3d':'#2a2a35'};border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.3s;background:#141419;display:flex;flex-direction:column;box-shadow:0 4px 15px rgba(0,0,0,0.3);`;
+                card.innerHTML=`<div style="position:relative;"><img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;${isCompleted?'filter:brightness(0.4) grayscale(0.5)':'filter:brightness(0.85)'};transition:0.3s;"><div style="position:absolute;inset:0;background:linear-gradient(0deg,#141419 0%,transparent 50%);pointer-events:none;"></div>${isCompleted?`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:2;"><i class="fa-solid fa-circle-check" style="font-size:42px;color:#28a745;filter:drop-shadow(0 0 10px rgba(40,167,69,0.6));"></i><span style="font-size:12px;font-weight:800;color:white;background:rgba(40,167,69,0.9);padding:4px 12px;border-radius:20px;letter-spacing:0.5px;">Tamamlandı</span></div>`:''}</div><div style="padding:15px 18px;flex:1;display:flex;flex-direction:column;justify-content:space-between;${isCompleted?'background:#101512;':''}"><div style="font-size:14px;font-weight:800;color:${isCompleted?'#888':'#fff'};margin-bottom:8px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;text-shadow:0 2px 4px rgba(0,0,0,0.5);">${task.desc||task.subject||'Görev'}</div><div style="font-size:12px;color:${isCompleted?'#1f8a3d':'#a0a0b0'};font-weight:700;display:flex;align-items:center;gap:8px;"><span style="background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;"><i class="fa-solid fa-film" style="color:#ff3333;"></i> ${task.taskVideos.length} video</span><span style="background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;"><i class="fa-solid fa-book" style="color:#4da3ff;"></i> ${(task.subLesson&&task.subLesson!=="Genel")?task.subLesson:(task.subject||"")}</span></div></div>`;
+                if(isCompleted){card.onmouseover=()=>{card.style.boxShadow='0 8px 25px rgba(40,167,69,0.2)';card.style.transform='translateY(-4px)';};card.onmouseout=()=>{card.style.boxShadow='0 4px 15px rgba(0,0,0,0.3)';card.style.transform='translateY(0)';};}
+                else{card.onmouseover=()=>{card.style.borderColor='#444';card.style.boxShadow='0 8px 25px rgba(0,0,0,0.5)';card.style.transform='translateY(-4px)';card.querySelector('img').style.filter='brightness(1)';};card.onmouseout=()=>{card.style.borderColor='#2a2a35';card.style.boxShadow='0 4px 15px rgba(0,0,0,0.3)';card.style.transform='translateY(0)';card.querySelector('img').style.filter='brightness(0.85)';};}
+                card.onclick=()=>openPlaylist(task);grid.appendChild(card);
+            });
+        }
+
+        function openPlaylist(task){
+            vwTask=task;vwVideos=task.taskVideos;vwTitle=task.desc||task.subject||'Görev';vwIdx=0;
+            vwWatched=new Set();
+            vwVideos.forEach((v,i)=>{let watched=false;if(v.plId!==undefined){const pl=savedPlaylists.find(p=>p.id.toString()===v.plId.toString());if(pl&&pl.videos&&v.index!==undefined&&pl.videos[v.index]!==undefined){watched=pl.videos[v.index].isWatched===true;}}if(watched)vwWatched.add(i);});
+            document.getElementById('vwVideoListTitle').textContent=vwTitle;showPlayerPane();renderVideoList();playVideo(0);
+        }
+
+        function updateCompleteBtn(){const btn=document.getElementById('vwCompleteTaskBtn');if(!btn||!vwVideos)return;const allWatched=vwVideos.every((_,i)=>vwWatched.has(i));btn.disabled=!allWatched;btn.style.opacity=allWatched?'1':'0.4';btn.style.cursor=allWatched?'pointer':'not-allowed';}
+
+        function renderVideoList(){
+            const el=document.getElementById('vwVideoList');el.innerHTML='';if(!vwVideos)return;
+            vwVideos.forEach((v,i)=>{
+                const active=i===vwIdx;const watched=vwWatched.has(i);const row=document.createElement('div');
+                row.style.cssText=`display:flex;gap:12px;align-items:center;padding:12px 15px;cursor:pointer;border-bottom:1px solid #1f1f27;border-left:3px solid ${active?'#ff3333':'transparent'};background:${active?'#1a1a24':'transparent'};transition:all 0.2s;`;
+                row.onmouseover=()=>{if(!active)row.style.background='#181820';};row.onmouseout=()=>{if(!active)row.style.background='transparent';};
+                row.innerHTML=`<div style="width:20px;text-align:center;flex-shrink:0;font-size:13px;font-weight:900;color:${active?'#ff3333':'#666'};">${active?'<i class="fa-solid fa-play" style="filter:drop-shadow(0 0 5px rgba(255,51,51,0.5));"></i>':i+1}</div><div style="position:relative;flex-shrink:0;"><img src="${(v.thumb||'').replace('default.jpg','hqdefault.jpg')}" style="width:64px;height:36px;object-fit:cover;border-radius:4px;${watched?'opacity:0.4':'opacity:0.9'};transition:0.2s;">${watched?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-check" style="color:white;font-size:16px;filter:drop-shadow(0 0 3px black);"></i></div>':''}</div><div style="min-width:0;flex:1;"><div style="font-size:12px;font-weight:${active?'800':'600'};color:${active?'#fff':'#ccc'};overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;${watched?'text-decoration:line-through;color:#777':''};line-height:1.4;">${v.title||'Video '+(i+1)}</div><div style="font-size:11px;color:#666;margin-top:4px;font-weight:700;"><i class="fa-solid fa-clock"></i> ${v.duration||''}</div></div><button data-toggle-idx="${i}" title="${watched?'İzlendi işaretini kaldır':'İzlendi olarak işaretle'}" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:2px solid ${watched?'#1f8a3d':'#333'};background:${watched?'#1f8a3d':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">${watched?'<i class="fa-solid fa-check" style="font-size:12px;color:white;"></i>':''}</button>`;
+                row.querySelector('[data-toggle-idx]').addEventListener('click',(e)=>{e.stopPropagation();window.vwToggleWatched(i);});
+                row.addEventListener('click',()=>{vwIdx=i;renderVideoList();playVideo(i);});el.appendChild(row);
+            });
+            updateCompleteBtn();
+        }
+
+        function showCustomConfirm(message){
+            return new Promise((resolve)=>{
+                const overlay=document.getElementById('customConfirmOverlay'),box=document.getElementById('customConfirmBox');
+                const msgEl=document.getElementById('customConfirmMessage'),okBtn=document.getElementById('customConfirmOkBtn'),cancelBtn=document.getElementById('customConfirmCancelBtn');
+                msgEl.textContent=message;overlay.style.display='flex';
+                setTimeout(()=>{box.style.transform='scale(1)';box.style.opacity='1';},10);
+                const closeAndResolve=(result)=>{box.style.transform='scale(0.9)';box.style.opacity='0';setTimeout(()=>{overlay.style.display='none';resolve(result);},200);okBtn.onclick=null;cancelBtn.onclick=null;};
+                okBtn.onclick=()=>closeAndResolve(true);cancelBtn.onclick=()=>closeAndResolve(false);
+            });
+        }
+
+        window.vwToggleWatched=async function(idx){
+            if(!vwTask||!vwVideos)return;const isWatched=vwWatched.has(idx);
+            if(isWatched&&vwTask.isCompleted){const onay=await showCustomConfirm("Bu videonun 'İzlendi' işaretini kaldırırsanız, ana programdaki bu görev de 'Tamamlanmadı' durumuna geri dönecektir. Onaylıyor musunuz?");if(!onay)return;vwTask.isCompleted=false;if(currentUserUid){try{await setDoc(doc(db,"users",currentUserUid,"userTasks",vwTask.id.toString()),vwTask,{merge:true});}catch(e){}}}
+            if(isWatched)vwWatched.delete(idx);else vwWatched.add(idx);
+            const newStatus=vwWatched.has(idx);const v=vwVideos[idx];
+            if(v.plId!==undefined){const pl=savedPlaylists.find(p=>p.id.toString()===v.plId.toString());if(pl&&pl.videos&&v.index!==undefined&&pl.videos[v.index]!==undefined){pl.videos[v.index].isWatched=newStatus;try{if(currentUserUid){await setDoc(doc(db,"users",currentUserUid,"userPlaylists",pl.id.toString()),pl,{merge:true});}}catch(e){console.error('Playlist kaydetme hatası:',e);}}}
+            renderVideoList();renderPlaylistGrid();
+        };
+
+        function playVideo(idx){
+            const v=vwVideos[idx];if(!v)return;const vid=getVideoId(v);const wrapper=document.getElementById('vwPlayerWrapper');
+            document.getElementById('vwNowTitle').textContent=v.title||'Video '+(idx+1);
+            const old=document.getElementById('vwIframe');if(old)old.remove();
+            if(vid){const iframe=document.createElement('iframe');iframe.id='vwIframe';iframe.style.cssText='flex:1;border:none;width:100%;height:100%;display:block;z-index:1;';iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');iframe.setAttribute('allowfullscreen','');iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');iframe.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1`;wrapper.appendChild(iframe);}
+            else{wrapper.innerHTML='<div style="color:#888;text-align:center;padding:40px;font-size:13px;width:100%;"><i class="fa-solid fa-triangle-exclamation" style="font-size:32px;margin-bottom:10px;display:block;"></i>Video ID bulunamadı.</div>';}
+        }
+
+        document.getElementById('vwCompleteTaskBtn').addEventListener('click',async()=>{
+            if(!vwTask)return;const btn=document.getElementById('vwCompleteTaskBtn');if(btn.disabled)return;
+            const confirmed=await new Promise(res=>{
+                const overlay=document.createElement('div');overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);opacity:0;transition:opacity 0.2s ease-out;';
+                overlay.innerHTML=`<div id="vwSuccessBox" style="background:#141419;width:400px;max-width:90%;border-radius:16px;border:1px solid #2a2a35;box-shadow:0 20px 40px rgba(0,0,0,0.6);padding:30px;text-align:center;transform:scale(0.9);transition:all 0.2s ease-out;"><div style="width:70px;height:70px;background:rgba(40,167,69,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px auto;"><i class="fa-solid fa-circle-check" style="color:#28a745;font-size:32px;filter:drop-shadow(0 0 10px rgba(40,167,69,0.4));"></i></div><h3 style="color:#fff;font-size:20px;margin:0 0 12px 0;font-weight:800;letter-spacing:0.5px;">Görevi Tamamla</h3><p style="color:#a0a0b0;font-size:14px;line-height:1.6;margin:0 0 25px 0;font-weight:600;">Tüm videolar izlendi. "<b style="color:#fff;">${vwTitle}</b>" görevini tamamlandı olarak işaretlemek istiyor musun?</p><div style="display:flex;gap:12px;justify-content:center;"><button id="vwConfirmNo" style="flex:1;padding:12px;border-radius:10px;border:1px solid #333;background:#222;color:#ccc;font-weight:700;cursor:pointer;transition:0.2s;font-size:14px;" onmouseover="this.style.background='#333';this.style.color='#fff';" onmouseout="this.style.background='#222';this.style.color='#ccc';">İptal</button><button id="vwConfirmYes" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#1f8a3d 0%,#155724 100%);color:white;font-weight:700;cursor:pointer;transition:0.2s;box-shadow:0 4px 15px rgba(31,138,61,0.3);font-size:14px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(31,138,61,0.5)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(31,138,61,0.3)';">Evet, Tamamla</button></div></div>`;
+                document.body.appendChild(overlay);setTimeout(()=>{overlay.style.opacity='1';overlay.querySelector('#vwSuccessBox').style.transform='scale(1)';},10);
+                const closeAndRes=(val)=>{overlay.style.opacity='0';overlay.querySelector('#vwSuccessBox').style.transform='scale(0.9)';setTimeout(()=>{document.body.removeChild(overlay);res(val);},200);};
+                overlay.querySelector('#vwConfirmYes').onclick=()=>closeAndRes(true);overlay.querySelector('#vwConfirmNo').onclick=()=>closeAndRes(false);
+            });
+            if(!confirmed)return;
+            const dk=vwDay;if(userTasks[dk]){const ti=userTasks[dk].findIndex(t=>t.id===vwTask.id);if(ti!==-1){userTasks[dk][ti]={...userTasks[dk][ti],isCompleted:true};try{if(currentUserUid)await setDoc(doc(db,"users",currentUserUid,"userTasks",vwTask.id.toString()),userTasks[dk][ti],{merge:true});}catch(e){}}}
+            const toast=document.createElement('div');toast.style.cssText='position:fixed;bottom:-50px;left:50%;transform:translateX(-50%);background:#141419;color:#fff;border:1px solid #1f8a3d;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:800;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;opacity:0;transition:all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);';
+            toast.innerHTML='<i class="fa-solid fa-circle-check" style="color:#28a745;font-size:18px;filter:drop-shadow(0 0 5px rgba(40,167,69,0.5));"></i> Görev tamamlandı olarak işaretlendi!';
+            document.body.appendChild(toast);setTimeout(()=>{toast.style.bottom='40px';toast.style.opacity='1';},10);setTimeout(()=>{toast.style.bottom='-50px';toast.style.opacity='0';},2500);setTimeout(()=>document.body.removeChild(toast),3000);
+            showPlaylistPane();renderPlaylistGrid();
+        });
+
+        document.getElementById('vwBackBtn').addEventListener('click',()=>{const _f=document.getElementById('vwIframe');if(_f)_f.src='';showPlaylistPane();renderPlaylistGrid();});
+
+        function changeWeek(d){vwWeek.setDate(vwWeek.getDate()+d*7);vwDay=null;vwVideos=null;vwTask=null;const iframe=document.getElementById('vwIframe');if(iframe)iframe.src='';showPlaylistPane();updateWeekLabel();renderDayTabs();renderPlaylistGrid();}
+        document.getElementById('vwPrevWeek').addEventListener('click',()=>changeWeek(-1));
+        document.getElementById('vwNextWeek').addEventListener('click',()=>changeWeek(1));
+
+        // === AUTH & VERİ YÜKLEME ===
+        onAuthStateChanged(auth,async(user)=>{
+            const authContainer=document.getElementById('headerAuthContainer');
+            if(user){
+                currentUserUid=user.uid;
+                let displayName=user.displayName||"Profil";
+                try{
+                    const userDoc=await getDoc(doc(db,"users",user.uid));
+                    if(userDoc.exists()){
+                        const data=userDoc.data();
+                        if(data.username) displayName=data.username;
+                        
+                        // 👇 YENİ EKLENEN: Admin yetkisi kontrolü
+                        if(data.isAdmin === true){
+                            if(document.getElementById('sideMenuAdminBtn')) document.getElementById('sideMenuAdminBtn').style.display='';
+                        }
+                        // 👆 YENİ EKLENEN KISIM
+                    }
+                }catch(e){console.error(e);}
+                
+                authContainer.innerHTML=`<span style="font-weight:700;font-size:13px;color:var(--color-text-secondary);"><i class="fa-solid fa-user" style="margin-right:5px;color:var(--color-primary);"></i> ${displayName}</span>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='none';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='none';
+                try{
+                    const plSnap=await getDocs(collection(db,"users",user.uid,"userPlaylists"));savedPlaylists=[];plSnap.forEach(d=>savedPlaylists.push(d.data()));
+                    const taskSnap=await getDocs(collection(db,"users",user.uid,"userTasks"));userTasks={};
+                    taskSnap.forEach(d=>{const t=d.data();const dk=t.dateKey||t.date;if(dk){if(!userTasks[dk])userTasks[dk]=[];userTasks[dk].push(t);}});
+
+                    // --- PROGRAM PROFİLLERİNİ ÇEK VE DROPDOWN'I DOLDUR ---
+                    let plannerProfiles = [{ id: 'main_profile', name: 'Ana Program', isMain: true }];
+                    try {
+                        const profDoc = await getDoc(doc(db, "users", user.uid, "settings", "plannerProfiles"));
+                        if (profDoc.exists() && profDoc.data().profiles) {
+                            plannerProfiles = profDoc.data().profiles;
+                        }
+                    } catch(e) { console.error("Profiller çekilemedi:", e); }
+
+                    // Ana profili en üste al
+                    plannerProfiles.sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0));
+
+                    const currentProfile = profileId();
+                    const dropdownEl = document.getElementById('pillProfileDropdown');
+                    const textEl = document.getElementById('pillProfileText');
+                    
+                    if (dropdownEl) {
+                        dropdownEl.innerHTML = '';
+                        plannerProfiles.forEach(p => {
+                            const isSelected = p.id === currentProfile;
+                            const icon = p.isMain 
+                                ? '<i class="fa-solid fa-star" style="color:#ffc107;font-size:11px;"></i>' 
+                                : (p.id.startsWith('mentor_') 
+                                    ? '<i class="fa-solid fa-chalkboard-user" style="color:#e67e22;font-size:11px;"></i>' 
+                                    : '<i class="fa-solid fa-folder" style="color:#4da3ff;font-size:11px;"></i>');
+                            const opt = document.createElement('div');
+                            opt.className = 'pill-profile-option' + (isSelected ? ' selected' : '');
+                            opt.setAttribute('data-value', p.id);
+                            opt.innerHTML = `${icon} ${p.name}`;
+                            opt.addEventListener('click', () => {
+                                window.selectPlannerProfile(p.id);
+                            });
+                            dropdownEl.appendChild(opt);
+                        });
+
+                        // Aktif profil adını güncelle
+                        const activeProfile = plannerProfiles.find(p => p.id === currentProfile);
+                        if (activeProfile && textEl) {
+                            textEl.textContent = activeProfile.name;
+                        } else if (textEl) {
+                            textEl.textContent = 'Ana Program';
+                        }
+                    }
+                    // --- PROGRAM PROFİLLERİ BİTTİ ---
+
+                }catch(e){console.error(e);}
+                const params=new URLSearchParams(window.location.search);const targetDate=params.get('date');
+                if(targetDate){const td=new Date(targetDate);vwWeek=getMonday(td);vwDay=targetDate;}else{vwWeek=getMonday(new Date());vwDay=null;}
+                updateWeekLabel();renderDayTabs();renderPlaylistGrid();
+            }else{
+                currentUserUid=null;
+                authContainer.innerHTML=`<button class="btn-outline" onclick="window.location.href='index.html?action=login'">Giriş Yap</button><button class="btn-primary" onclick="window.location.href='index.html?action=register'">Kaydol</button>`;
+                if(document.getElementById('sideMenuLoginBtn'))document.getElementById('sideMenuLoginBtn').style.display='';
+                if(document.getElementById('sideMenuRegisterBtn'))document.getElementById('sideMenuRegisterBtn').style.display='';
+                document.getElementById('vwPlaylistGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;"><i class="fa-solid fa-right-to-bracket" style="font-size:50px;color:#2a2a35;margin-bottom:15px;display:block;"></i><p style="color:#555;font-size:14px;font-weight:600;">Playlist Merkezini kullanmak için giriş yapmalısın.</p><a href="index.html?action=login" style="color:#ff3333;font-size:13px;font-weight:700;margin-top:10px;display:inline-block;">Giriş Yap →</a></div>';
+            }
+            setTimeout(()=>document.getElementById('mainPageLoader').classList.add('hidden'),300);
+        });
+    </script>
+</body>
+</html>
