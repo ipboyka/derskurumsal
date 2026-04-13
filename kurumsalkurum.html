@@ -677,7 +677,21 @@
     <script>
         var teachers = JSON.parse(localStorage.getItem('kurumTeachers') || '[]');
         var students = JSON.parse(localStorage.getItem('kurumStudents') || '[]');
-        function saveData() { localStorage.setItem('kurumTeachers', JSON.stringify(teachers)); localStorage.setItem('kurumStudents', JSON.stringify(students)); }
+        // savedSchedule artık RAM'de de tutuluyor - localStorage'a bağımlılık kalkıyor
+        var savedScheduleData = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+
+        function saveData() { 
+            localStorage.setItem('kurumTeachers', JSON.stringify(teachers)); 
+            localStorage.setItem('kurumStudents', JSON.stringify(students)); 
+        }
+        // Programı (schedule) kaydetmek için ayrı fonksiyon
+        function saveScheduleData() {
+            localStorage.setItem('kurumSavedSchedule', JSON.stringify(savedScheduleData));
+        }
+        // scheduleConfig'i kaydetmek için
+        function saveConfigData() {
+            localStorage.setItem('kurumScheduleConfig', JSON.stringify(scheduleConfig));
+        }
 
         function switchTab(tab) {
             ['teachers', 'students', 'programs', 'schedule'].forEach(t => {
@@ -897,7 +911,7 @@
         // Ortak Tablo Çizici (Çift Yönlü, Esnek Premium Tasarım)
         function buildScheduleTableHTML(person, customSchedule = null) {
             // Eğer özel bir program verildiyse (Otomatik Motor) onu kullan, yoksa kayıtlıyı çek
-            const savedSchedule = customSchedule || JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+            const savedSchedule = customSchedule || savedScheduleData;
             const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
             
             // Wrapper'a flex verdik ki tablo aşağı uzasın
@@ -1138,12 +1152,11 @@
         function executeScheduleDelete() {
             if(!confirm(`Seçilen ${assignmentsToDelete.size} dersi programdan kalıcı olarak kaldırmak istediğinize emin misiniz?`)) return;
 
-            let savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
-            savedSchedule = savedSchedule.filter(s => {
+            savedScheduleData = savedScheduleData.filter(s => {
                 const key = `${s.slotId}||${s.teacherId}||${s.studentId}`;
                 return !assignmentsToDelete.has(key);
             });
-            localStorage.setItem('kurumSavedSchedule', JSON.stringify(savedSchedule));
+            saveScheduleData();
             
             scheduleAppMode = 'NORMAL';
             assignmentsToDelete.clear();
@@ -1159,12 +1172,11 @@
         });
 
         function toggleLockAssignment(slotId, teacherId, studentId) {
-            let savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
-            const index = savedSchedule.findIndex(s => s.slotId === slotId && s.teacherId === teacherId && s.studentId === studentId);
+            const index = savedScheduleData.findIndex(s => s.slotId === slotId && s.teacherId === teacherId && s.studentId === studentId);
             
             if (index > -1) {
-                savedSchedule[index].locked = !savedSchedule[index].locked;
-                localStorage.setItem('kurumSavedSchedule', JSON.stringify(savedSchedule));
+                savedScheduleData[index].locked = !savedScheduleData[index].locked;
+                saveScheduleData();
                 
                 // Hem Modalı hem de "Programlar" sekmesindeki tabloyu anında yenile!
                 if (typeof refreshCurrentScheduleView === 'function') {
@@ -1183,7 +1195,7 @@
             days.forEach(day => tableHTML += `<th>${day}</th>`);
             tableHTML += '</tr></thead><tbody>';
 
-            let savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+            let savedSchedule = savedScheduleData;
 
             scheduleConfig.slots.forEach(slot => {
                 tableHTML += `<tr><td class="premium-time-col" style="padding:10px 5px; font-size:12px; line-height:1.2;">${slot.start}<br><span style="font-size:10px; opacity:0.6; font-weight:600;">${slot.end}</span></td>`;
@@ -1387,6 +1399,7 @@
         var scheduleConfig = JSON.parse(localStorage.getItem('kurumScheduleConfig')) || {
             startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: []
         };
+        window.scheduleConfig = scheduleConfig;
 
         function openScheduleModal() {
             document.getElementById('startTime').value = scheduleConfig.startTime;
@@ -1528,7 +1541,8 @@
                 specialBreaks: specialBreaks,
                 slots: generateSchedulePreview()
             };
-            localStorage.setItem('kurumScheduleConfig', JSON.stringify(scheduleConfig));
+            window.scheduleConfig = scheduleConfig;
+            saveConfigData();
             closeScheduleModal();
         }
 
@@ -1536,7 +1550,8 @@
         let lastGeneratedSchedule = []; // Son oluşturulan programı hafızada tutmak için
 
         function saveGeneratedSchedule() {
-            localStorage.setItem('kurumSavedSchedule', JSON.stringify(lastGeneratedSchedule));
+            savedScheduleData = lastGeneratedSchedule;
+            saveScheduleData();
             alert("Harika! Program başarıyla kaydedildi. Artık öğretmen ve öğrencilerin 'Programı Gör' butonuna tıklayarak atanan dersleri detaylıca görebilirsiniz.");
         }
 
@@ -1571,7 +1586,7 @@
             let busy = {}; 
             
             // --- YENİ: Kilitli Dersleri Hafızadan Çek ---
-            const savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+            const savedSchedule = savedScheduleData;
             const lockedAssignments = savedSchedule.filter(s => s.locked);
             
             // Kilitli dersleri direkt takvime ve meşgul haritasına ekle
@@ -1968,7 +1983,7 @@
         function renderManualAssignModal() {
             const container = document.getElementById('manualAssignContent');
             const { slotId, personId, personType } = currentManualAssignData;
-            let savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
+            let savedSchedule = savedScheduleData;
             let html = '';
             
             if (personType === 'teacher') {
@@ -2035,11 +2050,9 @@
         }
 
         function saveManualAssignment(slotId, teacherId, studentId, subject) {
-            let savedSchedule = JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]');
-            
             // KULLANICI TALEBİ: Manuel atanan dersler artık varsayılan olarak kilitsiz (normal) eklenecek.
-            savedSchedule.push({ slotId, teacherId, studentId, subject, locked: false });
-            localStorage.setItem('kurumSavedSchedule', JSON.stringify(savedSchedule));
+            savedScheduleData.push({ slotId, teacherId, studentId, subject, locked: false });
+            saveScheduleData();
 
             // Zeki Sistem: Eğer öğrencide bu ders seçili değilse profilini güncelle
             const studentIndex = students.findIndex(s => s.id === studentId);
@@ -2264,12 +2277,12 @@
         window.syncToFirebase = async function() {
             if (!window.currentUserId || !window.isFirebaseLoaded) return;
             try {
-                // RAM ve LocalStorage'daki en güncel verileri topla
+                // RAM'deki en güncel verileri topla (localStorage'a değil, doğrudan JS değişkenlerine bak)
                 const dataToSave = {
                     teachers: window.teachers || [],
                     students: window.students || [],
                     scheduleConfig: window.scheduleConfig || {},
-                    savedSchedule: JSON.parse(localStorage.getItem('kurumSavedSchedule') || '[]')
+                    savedSchedule: window.savedScheduleData || []
                 };
                 await setDoc(doc(db, "kurum_data", window.currentUserId), dataToSave);
                 console.log("Buluta (Firebase) başarıyla yedeklendi!");
@@ -2309,13 +2322,14 @@
                         window.teachers = kData.teachers || [];
                         window.students = kData.students || [];
                         window.scheduleConfig = kData.scheduleConfig || { startTime: "09:00", classDuration: 40, breakDuration: 10, classCount: 7, specialBreaks: [], slots: [] };
+                        window.savedScheduleData = kData.savedSchedule || [];
                         
                         // Verileri LocalStorage'a yaz (Hızlı yüklenme ve sistemin okuması için)
                         // Uyarı: originalSetItem kullanıyoruz ki kancaya takılıp sonsuz döngüye girmesin!
                         originalSetItem.call(localStorage, 'kurumTeachers', JSON.stringify(window.teachers));
                         originalSetItem.call(localStorage, 'kurumStudents', JSON.stringify(window.students));
                         originalSetItem.call(localStorage, 'kurumScheduleConfig', JSON.stringify(window.scheduleConfig));
-                        originalSetItem.call(localStorage, 'kurumSavedSchedule', JSON.stringify(kData.savedSchedule || []));
+                        originalSetItem.call(localStorage, 'kurumSavedSchedule', JSON.stringify(window.savedScheduleData));
                         
                         // Ekranlardaki Tabloları Buluttan Gelen Veriyle Baştan Çiz
                         if(typeof renderTeachers === 'function') renderTeachers();
